@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Naati Koli Farm — Owner Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --brown:#7B3F00;--brown-d:#5a2e00;--brown-l:#fdf3e0;
+  --gold:#f5c842;--green:#25D366;--red:#e24b4a;
+  --text:#2c1a00;--muted:#6b4c2a;--border:#e8d5b7;
+  --bg:#f8f4ef;--card:#fff;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Poppins',sans-serif;background:var(--bg);color:var(--text);max-width:520px;margin:0 auto;min-height:100vh;}
+
+/* AUTH */
+.auth-screen{min-height:100vh;display:flex;flex-direction:column;justify-content:center;padding:24px;}
+.auth-logo{text-align:center;margin-bottom:28px;}
+.auth-logo h1{font-size:22px;font-weight:600;color:var(--brown);}
+.auth-logo p{font-size:13px;color:var(--muted);margin-top:4px;}
+.auth-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:24px;}
+.auth-card h2{font-size:17px;font-weight:600;color:var(--brown);margin-bottom:4px;}
+.auth-card p{font-size:13px;color:var(--muted);margin-bottom:18px;}
+
+/* NAV */
+.topbar{background:var(--brown);padding:12px 16px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:50;}
+.topbar-title{color:#fff;font-size:16px;font-weight:600;}
+.topbar-sub{color:rgba(255,255,255,0.7);font-size:11px;}
+.logout-btn{background:rgba(255,255,255,0.15);color:#fff;border:none;padding:5px 12px;border-radius:20px;font-size:12px;cursor:pointer;}
+
+/* BOTTOM NAV */
+.bottom-nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:520px;background:#fff;border-top:1px solid var(--border);display:flex;z-index:50;}
+.bnav-btn{flex:1;padding:10px 4px 8px;text-align:center;font-size:10px;color:var(--muted);border:none;background:none;cursor:pointer;font-family:'Poppins',sans-serif;}
+.bnav-btn.active{color:var(--brown);font-weight:600;}
+.bnav-icon{font-size:20px;display:block;margin-bottom:2px;}
+
+/* PAGES */
+.page{display:none;padding:16px 16px 80px;} .page.active{display:block;}
+
+/* STATS CARDS */
+.stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;}
+.stat-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px;}
+.stat-label{font-size:11px;color:var(--muted);margin-bottom:4px;}
+.stat-val{font-size:24px;font-weight:600;color:var(--brown);}
+.stat-sub{font-size:11px;color:var(--muted);margin-top:2px;}
+
+/* ORDER CARDS */
+.ocard{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px;margin-bottom:10px;}
+.ocard-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;}
+.onum{font-size:12px;font-weight:600;color:var(--brown);}
+.otime{font-size:11px;color:var(--muted);}
+.cname{font-size:14px;font-weight:500;margin-bottom:2px;}
+.cphone{font-size:12px;color:var(--muted);}
+.odetail{font-size:13px;margin:8px 0;}
+.ototal{font-size:15px;font-weight:600;color:var(--brown);}
+.oaddr{font-size:11px;color:var(--muted);margin-top:4px;}
+.oactions{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:10px;}
+.action-btn{padding:6px 4px;font-size:11px;border:1px solid var(--border);border-radius:8px;cursor:pointer;background:#fff;font-family:'Poppins',sans-serif;text-align:center;}
+.action-btn.confirm{background:#cff4fc;border-color:#0ea5e9;color:#0369a1;}
+.action-btn.deliver{background:#d4f7e0;border-color:var(--green);color:#0a5e2a;}
+.action-btn.cancel{background:#fde8e8;border-color:var(--red);color:#a32d2d;}
+.action-btn.otd{background:#fff3cd;border-color:#ffc107;color:#856404;}
+.wa-action{padding:6px;font-size:11px;background:#e7fdf0;border:1px solid var(--green);border-radius:8px;cursor:pointer;color:#0a5e2a;font-weight:500;text-align:center;width:100%;margin-top:6px;}
+
+/* STATUS PILLS */
+.status-pill{padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;display:inline-block;}
+.s-pending{background:#fff3cd;color:#856404;}
+.s-confirmed{background:#cff4fc;color:#055160;}
+.s-out_for_delivery{background:#d1e7dd;color:#0a3622;}
+.s-delivered{background:#d4f7e0;color:#0a5e2a;}
+.s-cancelled{background:#fde8e8;color:#a32d2d;}
+
+/* FILTERS */
+.filter-bar{display:flex;gap:8px;margin-bottom:14px;overflow-x:auto;padding-bottom:4px;}
+.filter-btn{padding:5px 12px;border:1px solid var(--border);border-radius:20px;font-size:12px;background:#fff;cursor:pointer;white-space:nowrap;font-family:'Poppins',sans-serif;}
+.filter-btn.active{background:var(--brown);color:#fff;border-color:var(--brown);}
+
+/* PRODUCTS */
+.prod-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px;margin-bottom:10px;}
+.prod-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
+.prod-name{font-size:15px;font-weight:600;}
+.price-edit-row{display:flex;align-items:center;gap:8px;margin-bottom:10px;}
+.price-input{width:90px;padding:7px 10px;border:1.5px solid var(--border);border-radius:8px;font-size:15px;font-weight:600;text-align:center;font-family:'Poppins',sans-serif;}
+.save-btn{background:var(--brown);color:#fff;border:none;padding:7px 14px;border-radius:8px;font-size:13px;cursor:pointer;}
+.toggle{position:relative;width:46px;height:24px;}
+.toggle input{opacity:0;width:0;height:0;}
+.sld{position:absolute;cursor:pointer;inset:0;background:#ccc;border-radius:24px;transition:.3s;}
+.sld:before{position:absolute;content:"";height:18px;width:18px;left:3px;bottom:3px;background:#fff;border-radius:50%;transition:.3s;}
+input:checked+.sld{background:var(--green);}
+input:checked+.sld:before{transform:translateX(22px);}
+
+/* CUSTOMERS */
+.cust-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px;margin-bottom:10px;}
+.cust-top{display:flex;justify-content:space-between;align-items:flex-start;}
+.cust-name{font-size:14px;font-weight:600;}
+.cust-meta{font-size:12px;color:var(--muted);margin-top:2px;}
+.cust-stats{display:flex;gap:14px;margin-top:8px;padding-top:8px;border-top:1px solid var(--border);}
+.cust-stat{text-align:center;}
+.cust-stat-val{font-size:15px;font-weight:600;color:var(--brown);}
+.cust-stat-label{font-size:10px;color:var(--muted);}
+
+/* FORMS */
+.fg{margin-bottom:12px;}
+.fg label{display:block;font-size:12px;color:var(--muted);margin-bottom:4px;font-weight:500;}
+.fg input,.fg select,.fg textarea{width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;background:#fff;color:var(--text);font-family:'Poppins',sans-serif;}
+.frow{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.btn-main{width:100%;padding:12px;background:var(--brown);color:#fff;border:none;border-radius:12px;font-size:14px;font-weight:600;cursor:pointer;}
+.btn-sec{width:100%;padding:11px;background:#fff;color:var(--brown);border:2px solid var(--brown);border-radius:12px;font-size:14px;font-weight:600;cursor:pointer;margin-top:8px;}
+
+/* MISC */
+.alert{padding:10px 14px;border-radius:10px;font-size:13px;margin-bottom:12px;}
+.alert-success{background:#e7f9ed;color:#0a5e2a;border:1px solid #25D366;}
+.alert-error{background:#fde8e8;color:#a32d2d;border:1px solid var(--red);}
+.alert-info{background:#eff6ff;color:#1d4ed8;border:1px solid #93c5fd;}
+.sec-title{font-size:16px;font-weight:600;color:var(--brown);margin-bottom:14px;}
+.otp-inputs{display:flex;gap:8px;justify-content:center;margin:16px 0;}
+.otp-inputs input{width:44px;height:48px;text-align:center;font-size:20px;font-weight:600;border:2px solid var(--border);border-radius:10px;font-family:'Poppins',sans-serif;}
+.otp-inputs input:focus{outline:none;border-color:var(--brown);}
+.search-box{width:100%;padding:9px 14px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;margin-bottom:12px;font-family:'Poppins',sans-serif;}
+.spinner{display:inline-block;width:16px;height:16px;border:2px solid rgba(255,255,255,0.4);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;margin-right:6px;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.hidden{display:none!important;}
+.empty{text-align:center;padding:30px;color:var(--muted);font-size:14px;}
+.add-prod-btn{width:100%;padding:12px;background:var(--brown-l);color:var(--brown);border:2px dashed var(--brown);border-radius:12px;font-size:14px;font-weight:600;cursor:pointer;margin-bottom:14px;}
+.add-form{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px;margin-bottom:14px;}
+</style>
+</head>
+<body>
+
+<!-- ══ AUTH SCREEN ═══════════════════════════════════════════════════════════ -->
+<div id="auth-screen" class="auth-screen">
+  <div class="auth-logo">
+    <div style="font-size:48px;margin-bottom:10px;">🐔</div>
+    <h1>Naati Koli Farm</h1>
+    <p>Owner Dashboard — Mysore</p>
+  </div>
+
+  <div class="auth-card">
+    <!-- Step 1 -->
+    <div id="auth-step1">
+      <h2>Welcome, Abhishek 👋</h2>
+      <p>Enter your owner email to receive a login OTP.</p>
+      <div id="alert-a1"></div>
+      <div class="fg">
+        <label>Owner Email</label>
+        <input type="email" id="owner-email" value="poultry.mysore@gmail.com">
+      </div>
+      <button class="btn-main" onclick="ownerSendOTP()">Send OTP to Email</button>
+    </div>
+
+    <!-- Step 2 -->
+    <div id="auth-step2" class="hidden">
+      <h2>Enter OTP</h2>
+      <p id="auth-msg2">Check your email for the 6-digit code.</p>
+      <div id="alert-a2"></div>
+      <div class="otp-inputs">
+        <input type="number" id="p0" oninput="otpMove(this,null,'p1')">
+        <input type="number" id="p1" oninput="otpMove(this,'p0','p2')">
+        <input type="number" id="p2" oninput="otpMove(this,'p1','p3')">
+        <input type="number" id="p3" oninput="otpMove(this,'p2','p4')">
+        <input type="number" id="p4" oninput="otpMove(this,'p3','p5')">
+        <input type="number" id="p5" oninput="otpMove(this,'p4',null)">
+      </div>
+      <button class="btn-main" onclick="ownerVerifyOTP()">Login to Dashboard</button>
+      <button class="btn-sec" onclick="showAuthStep(1)">← Back</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ DASHBOARD ═════════════════════════════════════════════════════════════ -->
+<div id="dashboard" class="hidden">
+
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <div>
+      <div class="topbar-title">🐔 Naati Koli Farm</div>
+      <div class="topbar-sub">Welcome, Abhishek</div>
+    </div>
+    <button class="logout-btn" onclick="ownerLogout()">Logout</button>
+  </div>
+
+  <!-- HOME PAGE -->
+  <div id="page-home" class="page active">
+    <div id="alert-dash"></div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+      <div class="sec-title" style="margin:0;">Today's Summary</div>
+      <div style="font-size:12px;color:var(--muted)" id="today-date"></div>
+    </div>
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-label">Today's Orders</div>
+        <div class="stat-val" id="s-today-orders">—</div>
+        <div class="stat-sub" id="s-today-rev">Revenue: —</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Pending</div>
+        <div class="stat-val" id="s-pending">—</div>
+        <div class="stat-sub">Needs attention</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Total Orders</div>
+        <div class="stat-val" id="s-total">—</div>
+        <div class="stat-sub" id="s-total-rev">Revenue: —</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Customers</div>
+        <div class="stat-val" id="s-customers">—</div>
+        <div class="stat-sub">Registered</div>
+      </div>
+    </div>
+
+    <div class="sec-title">Recent Orders</div>
+    <div id="recent-orders"></div>
+  </div>
+
+  <!-- ORDERS PAGE -->
+  <div id="page-orders" class="page">
+    <div class="sec-title">All Orders</div>
+    <input class="search-box" type="text" placeholder="🔍 Search name, phone, order number..." oninput="searchOrders(this.value)">
+    <div class="filter-bar">
+      <button class="filter-btn active" onclick="filterOrders('all',this)">All</button>
+      <button class="filter-btn" onclick="filterOrders('pending',this)">⏳ Pending</button>
+      <button class="filter-btn" onclick="filterOrders('confirmed',this)">✅ Confirmed</button>
+      <button class="filter-btn" onclick="filterOrders('out_for_delivery',this)">🛵 On Way</button>
+      <button class="filter-btn" onclick="filterOrders('delivered',this)">🎉 Delivered</button>
+      <button class="filter-btn" onclick="filterOrders('cancelled',this)">❌ Cancelled</button>
+    </div>
+    <div id="orders-list"></div>
+  </div>
+
+  <!-- PRODUCTS PAGE -->
+  <div id="page-products" class="page">
+    <div class="sec-title">Manage Products & Prices</div>
+    <button class="add-prod-btn" onclick="toggleAddForm()">+ Add New Product</button>
+
+    <div id="add-form" class="add-form hidden">
+      <div style="font-size:14px;font-weight:600;margin-bottom:12px;color:var(--brown);">New Product</div>
+      <div id="alert-prod"></div>
+      <div class="frow">
+        <div class="fg"><label>Name (English)</label><input type="text" id="np-name" placeholder="Whole Chicken"></div>
+        <div class="fg"><label>Name (ಕನ್ನಡ)</label><input type="text" id="np-namekn" placeholder="ಪೂರ್ಣ ಕೋಳಿ"></div>
+      </div>
+      <div class="frow">
+        <div class="fg"><label>Price (₹)</label><input type="number" id="np-price" placeholder="320"></div>
+        <div class="fg"><label>Unit</label><select id="np-unit"><option>kg</option><option>egg</option><option>piece</option><option>litre</option></select></div>
+      </div>
+      <div class="fg"><label>Description</label><input type="text" id="np-desc" placeholder="Short description"></div>
+      <div class="fg"><label>Icon (emoji)</label><input type="text" id="np-icon" placeholder="🍗" value="🍗" maxlength="4"></div>
+      <button class="btn-main" onclick="addProduct()">Add Product</button>
+    </div>
+
+    <div id="products-list"></div>
+  </div>
+
+  <!-- CUSTOMERS PAGE -->
+  <div id="page-customers" class="page">
+    <div class="sec-title">All Customers</div>
+    <input class="search-box" type="text" placeholder="🔍 Search name, phone, email..." oninput="searchCustomers(this.value)" id="cust-search">
+    <div id="customers-list"></div>
+  </div>
+
+  <!-- BOTTOM NAV -->
+  <div class="bottom-nav">
+    <button class="bnav-btn active" onclick="switchTab('page-home',this)"><span class="bnav-icon">🏠</span>Home</button>
+    <button class="bnav-btn" onclick="switchTab('page-orders',this)"><span class="bnav-icon">📋</span>Orders</button>
+    <button class="bnav-btn" onclick="switchTab('page-products',this)"><span class="bnav-icon">🍗</span>Products</button>
+    <button class="bnav-btn" onclick="switchTab('page-customers',this)"><span class="bnav-icon">👥</span>Customers</button>
+  </div>
+</div>
+
+<script>
+// ── CONFIG ───────────────────────────────────────────────────────────────────
+const API = 'https://YOUR-RAILWAY-APP.railway.app'; // ← Replace after deploying
+let ownerToken = null;
+let allOrders = [];
+let allCustomers = [];
+let currentFilter = 'all';
+
+// ── INIT ─────────────────────────────────────────────────────────────────────
+window.onload = () => {
+  document.getElementById('today-date').textContent = new Date().toLocaleDateString('en-IN', {weekday:'long',day:'numeric',month:'long'});
+  const tok = localStorage.getItem('owner_token');
+  if (tok) { ownerToken = tok; showDashboard(); }
+};
+
+// ── AUTH ─────────────────────────────────────────────────────────────────────
+function showAuthStep(n) {
+  document.getElementById('auth-step1').classList.toggle('hidden', n !== 1);
+  document.getElementById('auth-step2').classList.toggle('hidden', n !== 2);
+}
+
+async function ownerSendOTP() {
+  const email = document.getElementById('owner-email').value.trim();
+  if (!email) { showAlert('alert-a1', 'Enter email.', 'error'); return; }
+  const btn = event.target;
+  btn.innerHTML = '<span class="spinner"></span>Sending...';
+  btn.disabled = true;
+  try {
+    const res = await fetch(`${API}/api/auth/send-otp`, {
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ email, role: 'owner' })
+    });
+    const data = await res.json();
+    if (data.success) {
+      document.getElementById('auth-msg2').textContent = `OTP sent to ${email}`;
+      showAuthStep(2);
+    } else {
+      showAlert('alert-a1', data.error || 'Failed.', 'error');
+    }
+  } catch (e) {
+    showAlert('alert-a1', 'Cannot reach server. Check API URL.', 'error');
+  }
+  btn.innerHTML = 'Send OTP to Email';
+  btn.disabled = false;
+}
+
+async function ownerVerifyOTP() {
+  const email = document.getElementById('owner-email').value.trim();
+  const otp = ['p0','p1','p2','p3','p4','p5'].map(id => document.getElementById(id).value).join('');
+  if (otp.length !== 6) { showAlert('alert-a2', 'Enter all 6 digits.', 'error'); return; }
+  try {
+    const res = await fetch(`${API}/api/owner/verify-otp`, {
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ email, otp })
+    });
+    const data = await res.json();
+    if (data.success) {
+      ownerToken = data.token;
+      localStorage.setItem('owner_token', data.token);
+      showDashboard();
+    } else {
+      showAlert('alert-a2', data.error || 'Invalid OTP.', 'error');
+    }
+  } catch (e) {
+    showAlert('alert-a2', 'Network error.', 'error');
+  }
+}
+
+function ownerLogout() {
+  if (!confirm('Logout?')) return;
+  localStorage.removeItem('owner_token');
+  ownerToken = null;
+  document.getElementById('auth-screen').classList.remove('hidden');
+  document.getElementById('dashboard').classList.add('hidden');
+}
+
+// ── DASHBOARD ─────────────────────────────────────────────────────────────────
+function showDashboard() {
+  document.getElementById('auth-screen').classList.add('hidden');
+  document.getElementById('dashboard').classList.remove('hidden');
+  loadStats();
+  loadProducts();
+}
+
+// ── TABS ─────────────────────────────────────────────────────────────────────
+function switchTab(pageId, btn) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById(pageId).classList.add('active');
+  document.querySelectorAll('.bnav-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  if (pageId === 'page-orders') loadOrders();
+  if (pageId === 'page-customers') loadCustomers();
+  if (pageId === 'page-products') loadProducts();
+}
+
+// ── STATS ────────────────────────────────────────────────────────────────────
+async function loadStats() {
+  try {
+    const res = await fetch(`${API}/api/owner/stats`, { headers: { 'Authorization': `Bearer ${ownerToken}` } });
+    if (res.status === 401) { ownerLogout(); return; }
+    const d = await res.json();
+    document.getElementById('s-today-orders').textContent = d.today.count;
+    document.getElementById('s-today-rev').textContent = `Revenue: ₹${parseFloat(d.today.revenue).toFixed(0)}`;
+    document.getElementById('s-pending').textContent = d.pending;
+    document.getElementById('s-total').textContent = d.total.count;
+    document.getElementById('s-total-rev').textContent = `Revenue: ₹${parseFloat(d.total.revenue).toFixed(0)}`;
+    document.getElementById('s-customers').textContent = d.customers;
+    document.getElementById('recent-orders').innerHTML = d.recentOrders.length
+      ? d.recentOrders.map(o => renderOrderCard(o, true)).join('')
+      : '<div class="empty">No orders yet.</div>';
+  } catch (e) {
+    showAlert('alert-dash', 'Could not load stats. Check API connection.', 'error');
+  }
+}
+
+// ── ORDERS ────────────────────────────────────────────────────────────────────
+async function loadOrders(status = null, search = null) {
+  document.getElementById('orders-list').innerHTML = '<div class="empty">Loading...</div>';
+  try {
+    let url = `${API}/api/owner/orders?`;
+    if (currentFilter !== 'all') url += `status=${currentFilter}&`;
+    if (search) url += `search=${encodeURIComponent(search)}&`;
+    const res = await fetch(url, { headers: { 'Authorization': `Bearer ${ownerToken}` } });
+    allOrders = await res.json();
+    renderOrders(allOrders);
+  } catch (e) {
+    document.getElementById('orders-list').innerHTML = '<div class="empty">Failed to load orders.</div>';
+  }
+}
+
+function renderOrders(orders) {
+  document.getElementById('orders-list').innerHTML = orders.length
+    ? orders.map(o => renderOrderCard(o, false)).join('')
+    : '<div class="empty">No orders found.</div>';
+}
+
+function renderOrderCard(o, compact) {
+  const time = new Date(o.created_at).toLocaleString('en-IN', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+  const actions = compact ? '' : `
+    <div class="oactions">
+      ${o.status === 'pending' ? `<button class="action-btn confirm" onclick="updateOrder(${o.id},'confirmed')">✅ Confirm</button>` : ''}
+      ${o.status === 'confirmed' ? `<button class="action-btn otd" onclick="updateOrder(${o.id},'out_for_delivery')">🛵 On Way</button>` : ''}
+      ${['confirmed','out_for_delivery'].includes(o.status) ? `<button class="action-btn deliver" onclick="updateOrder(${o.id},'delivered')">🎉 Delivered</button>` : ''}
+      ${!['delivered','cancelled'].includes(o.status) ? `<button class="action-btn cancel" onclick="updateOrder(${o.id},'cancelled')">❌ Cancel</button>` : ''}
+    </div>
+    <button class="wa-action" onclick="whatsappCustomer('${o.customer_phone}','${o.order_number}','${o.status}')">
+      📲 WhatsApp ${o.customer_name}
+    </button>`;
+  return `
+    <div class="ocard">
+      <div class="ocard-top">
+        <div>
+          <div class="onum">${o.order_number}</div>
+          <div class="otime">${time}</div>
+        </div>
+        <span class="status-pill s-${o.status}">${statusLabel(o.status)}</span>
+      </div>
+      <div class="cname">${o.icon || '🍗'} ${o.customer_name}</div>
+      <div class="cphone">📞 ${o.customer_phone}${o.customer_email ? ` | ${o.customer_email}` : ''}</div>
+      <div class="odetail">${o.product_name} × ${o.quantity} ${o.unit}</div>
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        <span class="ototal">₹${parseFloat(o.total_amount).toFixed(2)}</span>
+        ${o.delivery_date ? `<span style="font-size:11px;color:var(--muted);">📅 ${o.delivery_date}</span>` : ''}
+      </div>
+      <div class="oaddr">📍 ${o.delivery_address}</div>
+      ${o.notes ? `<div style="font-size:11px;color:var(--muted);margin-top:4px;">📝 ${o.notes}</div>` : ''}
+      ${actions}
+    </div>`;
+}
+
+async function updateOrder(id, status) {
+  try {
+    const res = await fetch(`${API}/api/owner/orders/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${ownerToken}` },
+      body: JSON.stringify({ status })
+    });
+    const data = await res.json();
+    if (data.success) {
+      loadOrders();
+      loadStats();
+    }
+  } catch (e) {
+    alert('Failed to update order.');
+  }
+}
+
+function filterOrders(status, btn) {
+  currentFilter = status;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  loadOrders();
+}
+
+function searchOrders(val) {
+  if (val.length >= 2 || val.length === 0) loadOrders(null, val);
+}
+
+function whatsappCustomer(phone, orderNum, status) {
+  const msg = encodeURIComponent(`Hello! This is Naati Koli Farm, Mysore.\n\nYour order ${orderNum} status: ${statusLabel(status)}.\n\nThank you for ordering with us! 🐔`);
+  window.open(`https://wa.me/91${phone}?text=${msg}`, '_blank');
+}
+
+function statusLabel(s) {
+  const map = { pending:'⏳ Pending', confirmed:'✅ Confirmed', out_for_delivery:'🛵 On the way', delivered:'🎉 Delivered', cancelled:'❌ Cancelled' };
+  return map[s] || s;
+}
+
+// ── PRODUCTS ──────────────────────────────────────────────────────────────────
+let products = [];
+
+async function loadProducts() {
+  try {
+    const res = await fetch(`${API}/api/products`);
+    products = await res.json();
+    renderProducts();
+  } catch (e) {
+    document.getElementById('products-list').innerHTML = '<div class="empty">Failed to load products.</div>';
+  }
+}
+
+function renderProducts() {
+  document.getElementById('products-list').innerHTML = products.map(p => `
+    <div class="prod-card">
+      <div class="prod-header">
+        <div>
+          <div class="prod-name">${p.icon} ${p.name}</div>
+          <div style="font-size:11px;color:var(--muted);">${p.description || ''}</div>
+        </div>
+        <label class="toggle">
+          <input type="checkbox" ${p.in_stock ? 'checked' : ''} onchange="toggleStock(${p.id},this.checked)">
+          <span class="sld"></span>
+        </label>
+      </div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:6px;">${p.in_stock ? '✅ In Stock' : '❌ Out of Stock'}</div>
+      <div class="price-edit-row">
+        <span style="font-size:15px;">₹</span>
+        <input class="price-input" type="number" id="price-${p.id}" value="${p.price}" min="1">
+        <span style="font-size:13px;color:var(--muted);">/${p.unit}</span>
+        <button class="save-btn" onclick="updatePrice(${p.id})">Save</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+async function updatePrice(id) {
+  const price = document.getElementById(`price-${id}`).value;
+  if (!price || price < 1) { alert('Enter valid price.'); return; }
+  try {
+    const res = await fetch(`${API}/api/products/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${ownerToken}` },
+      body: JSON.stringify({ price: parseFloat(price) })
+    });
+    const data = await res.json();
+    if (data.success) { showAlert('alert-dash', `Price updated to ₹${price}!`, 'success'); loadProducts(); }
+  } catch (e) { alert('Failed to update price.'); }
+}
+
+async function toggleStock(id, inStock) {
+  try {
+    await fetch(`${API}/api/products/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${ownerToken}` },
+      body: JSON.stringify({ in_stock: inStock ? 1 : 0 })
+    });
+    loadProducts();
+  } catch (e) { alert('Failed to update stock.'); }
+}
+
+function toggleAddForm() {
+  document.getElementById('add-form').classList.toggle('hidden');
+}
+
+async function addProduct() {
+  const name = document.getElementById('np-name').value.trim();
+  const price = document.getElementById('np-price').value;
+  const unit = document.getElementById('np-unit').value;
+  const desc = document.getElementById('np-desc').value.trim();
+  const icon = document.getElementById('np-icon').value.trim() || '🍗';
+  const namekn = document.getElementById('np-namekn').value.trim();
+  if (!name || !price) { showAlert('alert-prod', 'Name and price required.', 'error'); return; }
+  try {
+    const res = await fetch(`${API}/api/products`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${ownerToken}` },
+      body: JSON.stringify({ name, name_kn: namekn, description: desc, price: parseFloat(price), unit, icon })
+    });
+    const data = await res.json();
+    if (data.success) {
+      toggleAddForm();
+      loadProducts();
+      showAlert('alert-dash', `Product "${name}" added!`, 'success');
+    } else {
+      showAlert('alert-prod', data.error, 'error');
+    }
+  } catch (e) { showAlert('alert-prod', 'Failed to add.', 'error'); }
+}
+
+// ── CUSTOMERS ─────────────────────────────────────────────────────────────────
+async function loadCustomers() {
+  document.getElementById('customers-list').innerHTML = '<div class="empty">Loading...</div>';
+  try {
+    const res = await fetch(`${API}/api/owner/customers`, { headers: { 'Authorization': `Bearer ${ownerToken}` } });
+    allCustomers = await res.json();
+    renderCustomers(allCustomers);
+  } catch (e) {
+    document.getElementById('customers-list').innerHTML = '<div class="empty">Failed to load customers.</div>';
+  }
+}
+
+function renderCustomers(customers) {
+  document.getElementById('customers-list').innerHTML = customers.length
+    ? customers.map(c => `
+      <div class="cust-card">
+        <div class="cust-top">
+          <div>
+            <div class="cust-name">${c.name}</div>
+            <div class="cust-meta">📞 ${c.phone}</div>
+            ${c.email ? `<div class="cust-meta">✉️ ${c.email}</div>` : ''}
+            ${c.address ? `<div class="cust-meta">📍 ${c.address}</div>` : ''}
+          </div>
+          <div style="text-align:right;">
+            <div style="font-size:10px;color:var(--muted);">Since ${new Date(c.created_at).toLocaleDateString('en-IN')}</div>
+            ${c.last_order ? `<div style="font-size:10px;color:var(--muted);">Last: ${new Date(c.last_order).toLocaleDateString('en-IN')}</div>` : ''}
+          </div>
+        </div>
+        <div class="cust-stats">
+          <div class="cust-stat"><div class="cust-stat-val">${c.total_orders || 0}</div><div class="cust-stat-label">Orders</div></div>
+          <div class="cust-stat"><div class="cust-stat-val">₹${parseFloat(c.total_spent || 0).toFixed(0)}</div><div class="cust-stat-label">Total Spent</div></div>
+          <div class="cust-stat">
+            <button onclick="window.open('https://wa.me/91${c.phone}','_blank')" style="background:#e7fdf0;border:1px solid var(--green);border-radius:8px;padding:4px 10px;font-size:12px;cursor:pointer;color:#0a5e2a;">
+              📲 WhatsApp
+            </button>
+          </div>
+        </div>
+      </div>
+    `).join('')
+    : '<div class="empty">No customers yet.</div>';
+}
+
+function searchCustomers(val) {
+  const filtered = allCustomers.filter(c =>
+    c.name?.toLowerCase().includes(val.toLowerCase()) ||
+    c.phone?.includes(val) ||
+    c.email?.toLowerCase().includes(val.toLowerCase())
+  );
+  renderCustomers(filtered);
+}
+
+// ── HELPERS ───────────────────────────────────────────────────────────────────
+function otpMove(el, prev, next) {
+  if (el.value.length > 1) el.value = el.value.slice(-1);
+  if (el.value && next) document.getElementById(next).focus();
+  if (!el.value && prev) document.getElementById(prev).focus();
+}
+
+function showAlert(id, msg, type) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.className = `alert alert-${type}`;
+  el.textContent = msg;
+  el.classList.remove('hidden');
+  setTimeout(() => el.classList.add('hidden'), 4000);
+}
+</script>
+</body>
+</html>

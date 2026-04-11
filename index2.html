@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Naati Koli Farm — Order Fresh Desi Chicken</title>
+<link href="https://fonts.googleapis.com/css2?family=Tiro+Kannada&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --brown:#7B3F00;--brown-d:#5a2e00;--brown-l:#fdf3e0;
+  --gold:#f5c842;--green:#25D366;--red:#e24b4a;
+  --text:#2c1a00;--muted:#6b4c2a;--border:#e8d5b7;
+  --bg:#fffdf8;--card:#ffffff;--blue:#2563eb;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Poppins',sans-serif;background:var(--bg);color:var(--text);max-width:480px;margin:0 auto;min-height:100vh;}
+.kn{display:none;font-family:'Tiro Kannada',serif;}
+.en{display:inline;}
+body.kn-mode .en{display:none!important;}
+body.kn-mode .kn{display:block!important;}
+
+/* NAV */
+.lang-bar{background:var(--brown-d);display:flex;justify-content:space-between;align-items:center;padding:6px 16px;}
+.lang-btn{background:transparent;border:1px solid rgba(255,255,255,0.35);color:#fff;padding:3px 12px;border-radius:20px;font-size:12px;cursor:pointer;}
+.lang-btn.active{background:var(--gold);color:var(--brown-d);border-color:var(--gold);font-weight:600;}
+nav{background:var(--brown);padding:12px 16px;display:flex;justify-content:space-between;align-items:center;}
+.logo{color:#fff;font-size:18px;font-weight:600;}
+.logo span{color:var(--gold);}
+.logo-sub{color:rgba(255,255,255,0.7);font-size:11px;margin-top:1px;}
+.nav-right{display:flex;flex-direction:column;align-items:flex-end;gap:4px;}
+#nav-user-btn{background:var(--gold);color:var(--brown-d);border:none;padding:5px 12px;border-radius:20px;font-size:12px;font-weight:600;cursor:pointer;}
+
+/* PAGES */
+.page{display:none;} .page.active{display:block;}
+
+/* HERO */
+.hero{background:var(--brown-l);padding:28px 16px;text-align:center;border-bottom:2px solid var(--gold);}
+.hero h1{font-size:22px;font-weight:600;color:var(--brown);margin-bottom:6px;}
+.hero p{font-size:13px;color:var(--muted);margin-bottom:14px;line-height:1.6;}
+.badges{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;}
+.badge{background:var(--brown);color:#fff;font-size:11px;padding:4px 12px;border-radius:20px;}
+
+/* SECTION */
+.sec{padding:20px 16px;}
+.sec-title{font-size:16px;font-weight:600;color:var(--brown);margin-bottom:14px;}
+
+/* PRODUCTS */
+.products{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
+.pcard{background:var(--card);border:1.5px solid var(--border);border-radius:14px;padding:12px 8px;text-align:center;position:relative;}
+.picon{font-size:32px;margin-bottom:6px;}
+.pname{font-size:12px;font-weight:600;margin-bottom:2px;}
+.pdesc{font-size:10px;color:var(--muted);margin-bottom:8px;line-height:1.4;}
+.pprice{font-size:16px;font-weight:600;color:var(--brown);margin-bottom:6px;}
+.punit{font-size:10px;color:var(--muted);}
+.out-badge{position:absolute;top:8px;right:6px;background:#fde8e8;color:#a32d2d;font-size:9px;padding:2px 6px;border-radius:6px;font-weight:600;}
+.in-badge{position:absolute;top:8px;right:6px;background:#d4f7e0;color:#0a5e2a;font-size:9px;padding:2px 6px;border-radius:6px;font-weight:600;}
+.obtn{width:100%;padding:7px;background:var(--brown);color:#fff;border:none;border-radius:8px;font-size:11px;font-weight:500;cursor:pointer;}
+.obtn:disabled{background:#bbb;cursor:not-allowed;}
+
+/* FORM */
+.fg{margin-bottom:12px;}
+.fg label{display:block;font-size:11px;color:var(--muted);margin-bottom:4px;font-weight:500;}
+.fg input,.fg select,.fg textarea{width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;background:#fff;color:var(--text);font-family:'Poppins',sans-serif;}
+.fg input:focus,.fg select:focus,.fg textarea:focus{outline:none;border-color:var(--brown);}
+.frow{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.btn-main{width:100%;padding:13px;background:var(--brown);color:#fff;border:none;border-radius:12px;font-size:15px;font-weight:600;cursor:pointer;margin-top:4px;}
+.btn-main:disabled{background:#bbb;cursor:not-allowed;}
+.btn-sec{width:100%;padding:11px;background:#fff;color:var(--brown);border:2px solid var(--brown);border-radius:12px;font-size:14px;font-weight:600;cursor:pointer;margin-top:8px;}
+
+/* AUTH MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:100;display:flex;align-items:flex-end;justify-content:center;}
+.modal{background:#fff;border-radius:20px 20px 0 0;padding:24px 20px;width:100%;max-width:480px;max-height:85vh;overflow-y:auto;}
+.modal h2{font-size:18px;font-weight:600;color:var(--brown);margin-bottom:4px;}
+.modal p{font-size:13px;color:var(--muted);margin-bottom:18px;}
+.otp-inputs{display:flex;gap:8px;justify-content:center;margin:16px 0;}
+.otp-inputs input{width:44px;height:48px;text-align:center;font-size:20px;font-weight:600;border:2px solid var(--border);border-radius:10px;font-family:'Poppins',sans-serif;}
+.otp-inputs input:focus{outline:none;border-color:var(--brown);}
+.close-btn{position:absolute;top:16px;right:16px;background:none;border:none;font-size:22px;cursor:pointer;color:var(--muted);}
+.or-divider{text-align:center;color:var(--muted);font-size:13px;margin:16px 0;position:relative;}
+.or-divider::before,.or-divider::after{content:'';position:absolute;top:50%;width:42%;height:1px;background:var(--border);}
+.or-divider::before{left:0;} .or-divider::after{right:0;}
+
+/* ALERTS */
+.alert{padding:10px 14px;border-radius:10px;font-size:13px;margin-bottom:12px;}
+.alert-success{background:#e7f9ed;color:#0a5e2a;border:1px solid #25D366;}
+.alert-error{background:#fde8e8;color:#a32d2d;border:1px solid var(--red);}
+.alert-info{background:#eff6ff;color:#1d4ed8;border:1px solid #93c5fd;}
+
+/* ORDER STATUS */
+.status-pill{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;}
+.s-pending{background:#fff3cd;color:#856404;}
+.s-confirmed{background:#cff4fc;color:#055160;}
+.s-out_for_delivery{background:#d1e7dd;color:#0a3622;}
+.s-delivered{background:#d4f7e0;color:#0a5e2a;}
+.s-cancelled{background:#fde8e8;color:#a32d2d;}
+
+/* ORDER CARD */
+.ocard{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px;margin-bottom:12px;}
+.ocard-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;}
+.onum{font-size:12px;font-weight:600;color:var(--brown);}
+.odate{font-size:11px;color:var(--muted);}
+.odetail{font-size:13px;margin-bottom:6px;}
+.ototal{font-size:15px;font-weight:600;color:var(--brown);}
+
+/* WA BTN */
+.wa-btn{display:flex;align-items:center;justify-content:center;gap:8px;background:var(--green);color:#fff;padding:13px;border-radius:12px;font-size:14px;font-weight:600;cursor:pointer;border:none;width:100%;margin-top:10px;}
+.divider{border:none;border-top:1px solid var(--border);}
+.tab-bar{display:flex;border-bottom:2px solid var(--border);margin-bottom:16px;}
+.tab{flex:1;padding:10px;text-align:center;font-size:13px;cursor:pointer;color:var(--muted);border:none;background:none;font-family:'Poppins',sans-serif;}
+.tab.active{color:var(--brown);border-bottom:2px solid var(--brown);font-weight:600;margin-bottom:-2px;}
+footer{background:var(--brown);color:#fff;padding:18px 16px;text-align:center;font-size:13px;}
+footer a{color:var(--gold);text-decoration:none;}
+.spinner{display:inline-block;width:16px;height:16px;border:2px solid rgba(255,255,255,0.4);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;margin-right:6px;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.hidden{display:none!important;}
+</style>
+</head>
+<body>
+
+<!-- ══ LANGUAGE BAR ══════════════════════════════════════════════════════════ -->
+<div class="lang-bar">
+  <div style="color:#fff;font-size:12px;">🐔 Naati Koli Farm</div>
+  <div style="display:flex;gap:6px;">
+    <button class="lang-btn active" onclick="setLang('en')">English</button>
+    <button class="lang-btn" onclick="setLang('kn')">ಕನ್ನಡ</button>
+  </div>
+</div>
+
+<!-- ══ NAV ═══════════════════════════════════════════════════════════════════ -->
+<nav>
+  <div>
+    <div class="logo">🐔 Naati <span>Koli</span></div>
+    <div class="logo-sub">
+      <span class="en">Mysore, Karnataka</span>
+      <span class="kn">ಮೈಸೂರು, ಕರ್ನಾಟಕ</span>
+    </div>
+  </div>
+  <div class="nav-right">
+    <button id="nav-user-btn" onclick="handleNavBtn()">
+      <span class="en">Login</span><span class="kn">ಲಾಗಿನ್</span>
+    </button>
+  </div>
+</nav>
+
+<!-- ══ HOME PAGE ═════════════════════════════════════════════════════════════ -->
+<div id="page-home" class="page active">
+  <div class="hero">
+    <h1>
+      <span class="en">100% Pure Desi Chicken</span>
+      <span class="kn">೧೦೦% ಶುದ್ಧ ನಾಟಿ ಕೋಳಿ</span>
+    </h1>
+    <p>
+      <span class="en">Farm-fresh naati koli delivered to your door.<br>No hormones — just real taste.</span>
+      <span class="kn">ನಿಮ್ಮ ಮನೆ ಬಾಗಿಲಿಗೆ ತಾಜಾ ನಾಟಿ ಕೋಳಿ.<br>ಯಾವುದೇ ರಾಸಾಯನಿಕ ಇಲ್ಲ.</span>
+    </p>
+    <div class="badges">
+      <span class="badge"><span class="en">Free-range</span><span class="kn">ಮುಕ್ತ ಸಾಕಣೆ</span></span>
+      <span class="badge"><span class="en">Home delivery</span><span class="kn">ಮನೆ ತಲುಪಿಕೆ</span></span>
+      <span class="badge"><span class="en">Bulk orders</span><span class="kn">ದೊಡ್ಡ ಆರ್ಡರ್</span></span>
+    </div>
+  </div>
+
+  <!-- PRODUCTS -->
+  <div class="sec">
+    <div class="sec-title">
+      <span class="en">Our Products</span><span class="kn">ನಮ್ಮ ಉತ್ಪನ್ನಗಳು</span>
+    </div>
+    <div id="products-grid" class="products">
+      <div style="grid-column:1/-1;text-align:center;padding:20px;color:var(--muted);">Loading products...</div>
+    </div>
+  </div>
+
+  <hr class="divider">
+
+  <!-- ORDER FORM -->
+  <div class="sec" id="order-form-sec">
+    <div class="sec-title">
+      <span class="en">Place Your Order</span><span class="kn">ಆರ್ಡರ್ ಮಾಡಿ</span>
+    </div>
+
+    <div id="alert-order"></div>
+
+    <!-- Login notice for guests -->
+    <div id="guest-notice" class="alert alert-info" style="margin-bottom:12px;">
+      💡 <span class="en"><strong>Tip:</strong> <a href="#" onclick="showLogin();return false;" style="color:var(--blue)">Login with email</a> to track your orders anytime. Or continue as guest below.</span>
+      <span class="kn"><strong>ಸಲಹೆ:</strong> <a href="#" onclick="showLogin();return false;" style="color:var(--blue)">ಇಮೇಲ್ ನಿಂದ ಲಾಗಿನ್</a> ಮಾಡಿ ಆರ್ಡರ್ ಟ್ರ್ಯಾಕ್ ಮಾಡಿ. ಅಥವಾ ಕೆಳಗೆ ಗೆಸ್ಟ್ ಆಗಿ ಮುಂದುವರಿಯಿರಿ.</span>
+    </div>
+
+    <!-- Guest fields (hidden if logged in) -->
+    <div id="guest-fields">
+      <div class="frow">
+        <div class="fg">
+          <label><span class="en">Your name *</span><span class="kn">ಹೆಸರು *</span></label>
+          <input type="text" id="o-name" placeholder="Name">
+        </div>
+        <div class="fg">
+          <label><span class="en">Phone *</span><span class="kn">ಫೋನ್ *</span></label>
+          <input type="tel" id="o-phone" placeholder="9876543210">
+        </div>
+      </div>
+    </div>
+
+    <div class="frow">
+      <div class="fg">
+        <label><span class="en">Product *</span><span class="kn">ಉತ್ಪನ್ನ *</span></label>
+        <select id="o-product"></select>
+      </div>
+      <div class="fg">
+        <label><span class="en">Quantity *</span><span class="kn">ಪ್ರಮಾಣ *</span></label>
+        <input type="number" id="o-qty" placeholder="e.g. 2" min="0.5" step="0.5">
+      </div>
+    </div>
+    <div class="fg">
+      <label><span class="en">Delivery address *</span><span class="kn">ವಿಳಾಸ *</span></label>
+      <textarea id="o-addr" rows="2" placeholder="House, Street, Area, Mysore..."></textarea>
+    </div>
+    <div class="frow">
+      <div class="fg">
+        <label><span class="en">Delivery date</span><span class="kn">ದಿನಾಂಕ</span></label>
+        <input type="date" id="o-date">
+      </div>
+      <div class="fg">
+        <label><span class="en">Notes</span><span class="kn">ಟಿಪ್ಪಣಿ</span></label>
+        <input type="text" id="o-notes" placeholder="Optional">
+      </div>
+    </div>
+
+    <div id="order-summary" class="alert alert-info hidden"></div>
+
+    <button class="btn-main" onclick="placeOrder()">
+      <span class="en">Place Order</span><span class="kn">ಆರ್ಡರ್ ಮಾಡಿ</span>
+    </button>
+    <button class="wa-btn" onclick="orderViaWhatsApp()">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.124.558 4.122 1.533 5.855L0 24l6.31-1.51A11.93 11.93 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.797 9.797 0 01-5.003-1.367l-.357-.214-3.747.897.944-3.653-.234-.374A9.755 9.755 0 012.182 12C2.182 6.573 6.573 2.182 12 2.182S21.818 6.573 21.818 12 17.427 21.818 12 21.818z"/></svg>
+      <span class="en">Order via WhatsApp</span><span class="kn">WhatsApp ಮೂಲಕ</span>
+    </button>
+  </div>
+
+  <!-- CONTACT -->
+  <hr class="divider">
+  <div class="sec">
+    <div class="sec-title"><span class="en">Call Us</span><span class="kn">ಸಂಪರ್ಕಿಸಿ</span></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+      <a href="tel:+919900665887" style="display:flex;flex-direction:column;align-items:center;background:var(--brown);color:#fff;padding:12px;border-radius:12px;text-decoration:none;font-size:13px;font-weight:500;">
+        📞 9900665887<small style="font-size:10px;opacity:0.7;margin-top:2px;"><span class="en">Tap to call</span><span class="kn">ಕರೆ ಮಾಡಿ</span></small>
+      </a>
+      <a href="tel:+918095222673" style="display:flex;flex-direction:column;align-items:center;background:var(--brown);color:#fff;padding:12px;border-radius:12px;text-decoration:none;font-size:13px;font-weight:500;">
+        📞 8095222673<small style="font-size:10px;opacity:0.7;margin-top:2px;"><span class="en">Tap to call</span><span class="kn">ಕರೆ ಮಾಡಿ</span></small>
+      </a>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MY ORDERS PAGE ════════════════════════════════════════════════════════ -->
+<div id="page-orders" class="page">
+  <div class="sec">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+      <div class="sec-title" style="margin:0;">
+        <span class="en">My Orders</span><span class="kn">ನನ್ನ ಆರ್ಡರ್ಗಳು</span>
+      </div>
+      <button onclick="showPage('page-home')" style="background:none;border:none;color:var(--brown);font-size:13px;cursor:pointer;font-weight:500;">← <span class="en">Back</span><span class="kn">ಹಿಂದೆ</span></button>
+    </div>
+    <div id="orders-list"></div>
+  </div>
+</div>
+
+<!-- ══ AUTH MODAL ════════════════════════════════════════════════════════════ -->
+<div id="auth-modal" class="modal-overlay hidden">
+  <div class="modal" style="position:relative;">
+    <button class="close-btn" onclick="closeModal()">✕</button>
+
+    <!-- Step 1: Email -->
+    <div id="auth-step1">
+      <h2><span class="en">Login to your account</span><span class="kn">ಲಾಗಿನ್ ಮಾಡಿ</span></h2>
+      <p><span class="en">Enter your email — we'll send you a 6-digit OTP.</span><span class="kn">ನಿಮ್ಮ ಇಮೇಲ್ ನಮೂದಿಸಿ — OTP ಕಳಿಸುತ್ತೇವೆ.</span></p>
+      <div id="alert-auth1"></div>
+      <div class="fg">
+        <label>Email</label>
+        <input type="email" id="auth-email" placeholder="you@gmail.com">
+      </div>
+      <button class="btn-main" onclick="sendOTP()">
+        <span class="en">Send OTP</span><span class="kn">OTP ಕಳಿಸಿ</span>
+      </button>
+      <div class="or-divider"><span style="background:#fff;padding:0 10px;position:relative;z-index:1;"><span class="en">or</span><span class="kn">ಅಥವಾ</span></span></div>
+      <button class="btn-sec" onclick="closeModal()">
+        <span class="en">Continue as Guest</span><span class="kn">ಗೆಸ್ಟ್ ಆಗಿ ಮುಂದುವರಿಯಿರಿ</span>
+      </button>
+    </div>
+
+    <!-- Step 2: OTP -->
+    <div id="auth-step2" class="hidden">
+      <h2><span class="en">Enter OTP</span><span class="kn">OTP ನಮೂದಿಸಿ</span></h2>
+      <p id="otp-sent-msg"></p>
+      <div id="alert-auth2"></div>
+      <div class="fg">
+        <label><span class="en">Also tell us about you</span><span class="kn">ನಿಮ್ಮ ವಿವರ</span></label>
+        <input type="text" id="auth-name" placeholder="Your name / ಹೆಸರು" style="margin-bottom:8px;">
+        <input type="tel" id="auth-phone" placeholder="Phone / ಫೋನ್" style="margin-bottom:8px;">
+        <input type="text" id="auth-addr" placeholder="Address / ವಿಳಾಸ (optional)">
+      </div>
+      <div class="otp-inputs">
+        <input type="number" maxlength="1" id="o0" oninput="otpMove(this,null,'o1')">
+        <input type="number" maxlength="1" id="o1" oninput="otpMove(this,'o0','o2')">
+        <input type="number" maxlength="1" id="o2" oninput="otpMove(this,'o1','o3')">
+        <input type="number" maxlength="1" id="o3" oninput="otpMove(this,'o2','o4')">
+        <input type="number" maxlength="1" id="o4" oninput="otpMove(this,'o3','o5')">
+        <input type="number" maxlength="1" id="o5" oninput="otpMove(this,'o4',null)">
+      </div>
+      <button class="btn-main" onclick="verifyOTP()">
+        <span class="en">Verify & Login</span><span class="kn">ಪರಿಶೀಲಿಸಿ & ಲಾಗಿನ್</span>
+      </button>
+      <button class="btn-sec" style="margin-top:8px;" onclick="showStep(1)">
+        <span class="en">← Back</span><span class="kn">← ಹಿಂದೆ</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <div style="font-size:15px;font-weight:600;margin-bottom:4px;">🐔 Naati Koli Farm</div>
+  <div>📍 <span class="en">Mysore, Karnataka</span><span class="kn">ಮೈಸೂರು, ಕರ್ನಾಟಕ</span></div>
+  <div style="margin-top:4px;">📞 <a href="tel:+919900665887">9900665887</a> | <a href="tel:+918095222673">8095222673</a></div>
+  <div style="color:var(--gold);font-size:11px;margin-top:6px;"><span class="en">Fresh daily. Open 7am–7pm.</span><span class="kn">ಪ್ರತಿದಿನ ತಾಜಾ. ಬೆಳಿಗ್ಗೆ 7 – ಸಂಜೆ 7.</span></div>
+</footer>
+
+<script>
+// ── CONFIG ───────────────────────────────────────────────────────────────────
+const API = 'https://YOUR-RAILWAY-APP.railway.app'; // ← Replace after deploying
+let products = [];
+let currentUser = null;
+let currentToken = null;
+
+// ── INIT ─────────────────────────────────────────────────────────────────────
+window.onload = async () => {
+  const tok = localStorage.getItem('ctoken');
+  const usr = localStorage.getItem('cuser');
+  if (tok && usr) {
+    currentToken = tok;
+    currentUser = JSON.parse(usr);
+    updateNavUser();
+    hideGuestFields();
+  }
+  await loadProducts();
+};
+
+// ── LANGUAGE ─────────────────────────────────────────────────────────────────
+function setLang(lang) {
+  const isKn = lang === 'kn';
+  document.body.classList.toggle('kn-mode', isKn);
+  document.querySelectorAll('.kn').forEach(el => el.style.display = isKn ? 'block' : 'none');
+  document.querySelectorAll('.en').forEach(el => el.style.display = isKn ? 'none' : 'inline');
+  document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
+  event.target.classList.add('active');
+}
+
+// ── PAGES ────────────────────────────────────────────────────────────────────
+function showPage(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  if (id === 'page-orders') loadMyOrders();
+}
+
+// ── NAV ──────────────────────────────────────────────────────────────────────
+function updateNavUser() {
+  const btn = document.getElementById('nav-user-btn');
+  if (currentUser) {
+    btn.textContent = `👤 ${currentUser.name.split(' ')[0]}`;
+  } else {
+    btn.innerHTML = '<span class="en">Login</span><span class="kn">ಲಾಗಿನ್</span>';
+  }
+}
+
+function handleNavBtn() {
+  if (currentUser) {
+    showUserMenu();
+  } else {
+    showLogin();
+  }
+}
+
+function showUserMenu() {
+  if (confirm(`Logged in as ${currentUser.name}\n\nOptions:\n• View My Orders\n• Logout`)) {
+    showPage('page-orders');
+  } else {
+    if (confirm('Logout?')) logout();
+  }
+}
+
+function logout() {
+  localStorage.removeItem('ctoken');
+  localStorage.removeItem('cuser');
+  currentToken = null;
+  currentUser = null;
+  updateNavUser();
+  showGuestFields();
+  document.getElementById('guest-notice').classList.remove('hidden');
+}
+
+// ── PRODUCTS ─────────────────────────────────────────────────────────────────
+async function loadProducts() {
+  try {
+    const res = await fetch(`${API}/api/products`);
+    products = await res.json();
+    renderProducts();
+    populateProductSelect();
+  } catch (e) {
+    document.getElementById('products-grid').innerHTML =
+      '<div style="grid-column:1/-1;text-align:center;color:var(--red);padding:20px;">Could not load products. Check API connection.</div>';
+  }
+}
+
+function renderProducts() {
+  const grid = document.getElementById('products-grid');
+  if (!products.length) { grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:20px;color:var(--muted);">No products available.</div>'; return; }
+  grid.innerHTML = products.map(p => `
+    <div class="pcard">
+      ${p.in_stock ? '<span class="in-badge">✓ Stock</span>' : '<span class="out-badge">Out</span>'}
+      <div class="picon">${p.icon}</div>
+      <div class="pname">${p.name}${p.name_kn ? `<span class="kn" style="display:none;font-family:'Tiro Kannada',serif;">${p.name_kn}</span>` : ''}</div>
+      <div class="pdesc">${p.description || ''}${p.description_kn ? `<span class="kn" style="display:none;font-family:'Tiro Kannada',serif;">${p.description_kn}</span>` : ''}</div>
+      <div class="pprice">₹${p.price} <span class="punit">/${p.unit}</span></div>
+      <button class="obtn" ${!p.in_stock ? 'disabled' : ''} onclick="quickOrder(${p.id})">
+        <span class="en">${p.in_stock ? 'Order now' : 'Out of stock'}</span>
+        <span class="kn" style="display:none;">${p.in_stock ? 'ಆರ್ಡರ್ ಮಾಡಿ' : 'ಲಭ್ಯವಿಲ್ಲ'}</span>
+      </button>
+    </div>
+  `).join('');
+}
+
+function populateProductSelect() {
+  const sel = document.getElementById('o-product');
+  sel.innerHTML = products.filter(p => p.in_stock).map(p =>
+    `<option value="${p.id}">${p.icon} ${p.name} — ₹${p.price}/${p.unit}</option>`
+  ).join('');
+  updateOrderSummary();
+}
+
+function quickOrder(pid) {
+  document.getElementById('o-product').value = pid;
+  document.getElementById('order-form-sec').scrollIntoView({ behavior: 'smooth' });
+  updateOrderSummary();
+}
+
+function updateOrderSummary() {
+  const pid = document.getElementById('o-product').value;
+  const qty = parseFloat(document.getElementById('o-qty').value) || 0;
+  const prod = products.find(p => p.id == pid);
+  const summary = document.getElementById('order-summary');
+  if (prod && qty > 0) {
+    const total = (prod.price * qty).toFixed(2);
+    summary.textContent = `${prod.icon} ${prod.name} × ${qty} ${prod.unit} = ₹${total}`;
+    summary.classList.remove('hidden');
+  } else {
+    summary.classList.add('hidden');
+  }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('o-product')?.addEventListener('change', updateOrderSummary);
+  document.getElementById('o-qty')?.addEventListener('input', updateOrderSummary);
+});
+
+// ── ORDERS ───────────────────────────────────────────────────────────────────
+async function placeOrder() {
+  const pid = document.getElementById('o-product').value;
+  const qty = document.getElementById('o-qty').value;
+  const addr = document.getElementById('o-addr').value.trim();
+  const date = document.getElementById('o-date').value;
+  const notes = document.getElementById('o-notes').value.trim();
+
+  if (!pid || !qty || !addr) {
+    showAlert('alert-order', 'Please fill product, quantity and address.', 'error');
+    return;
+  }
+
+  const body = {
+    product_id: parseInt(pid),
+    quantity: parseFloat(qty),
+    delivery_address: addr,
+    delivery_date: date || null,
+    notes: notes || null,
+    customer_token: currentToken || null
+  };
+
+  if (!currentToken) {
+    const name = document.getElementById('o-name')?.value.trim();
+    const phone = document.getElementById('o-phone')?.value.trim();
+    if (!name || !phone) {
+      showAlert('alert-order', 'Please enter your name and phone number.', 'error');
+      return;
+    }
+    body.guest_name = name;
+    body.guest_phone = phone;
+  }
+
+  try {
+    const res = await fetch(`${API}/api/orders`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+    const data = await res.json();
+    if (data.success) {
+      showAlert('alert-order', `✅ Order placed! Your order number: ${data.order.order_number}`, 'success');
+      document.getElementById('o-qty').value = '';
+      document.getElementById('o-addr').value = '';
+      document.getElementById('o-notes').value = '';
+      document.getElementById('order-summary').classList.add('hidden');
+    } else {
+      showAlert('alert-order', data.error || 'Failed to place order.', 'error');
+    }
+  } catch (e) {
+    showAlert('alert-order', 'Network error. Please try again.', 'error');
+  }
+}
+
+async function loadMyOrders() {
+  if (!currentToken) {
+    document.getElementById('orders-list').innerHTML = '<div class="alert alert-info">Please login to view your orders.</div>';
+    return;
+  }
+  document.getElementById('orders-list').innerHTML = '<div style="text-align:center;padding:20px;color:var(--muted);">Loading...</div>';
+  try {
+    const res = await fetch(`${API}/api/orders/my`, {
+      headers: { 'Authorization': `Bearer ${currentToken}` }
+    });
+    const orders = await res.json();
+    if (!orders.length) {
+      document.getElementById('orders-list').innerHTML = '<div class="alert alert-info"><span class="en">No orders yet. Place your first order!</span><span class="kn">ಇನ್ನೂ ಆರ್ಡರ್ ಇಲ್ಲ. ಮೊದಲ ಆರ್ಡರ್ ಮಾಡಿ!</span></div>';
+      return;
+    }
+    document.getElementById('orders-list').innerHTML = orders.map(o => `
+      <div class="ocard">
+        <div class="ocard-header">
+          <span class="onum">${o.order_number}</span>
+          <span class="status-pill s-${o.status}">${statusLabel(o.status)}</span>
+        </div>
+        <div class="odetail">${o.icon || '🍗'} ${o.product_name} × ${o.quantity} ${o.unit}</div>
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <span class="ototal">₹${parseFloat(o.total_amount).toFixed(2)}</span>
+          <span class="odate">${new Date(o.created_at).toLocaleDateString('en-IN')}</span>
+        </div>
+        ${o.notes ? `<div style="font-size:11px;color:var(--muted);margin-top:6px;">📝 ${o.notes}</div>` : ''}
+      </div>
+    `).join('');
+  } catch (e) {
+    document.getElementById('orders-list').innerHTML = '<div class="alert alert-error">Failed to load orders.</div>';
+  }
+}
+
+function statusLabel(s) {
+  const map = { pending:'⏳ Pending', confirmed:'✅ Confirmed', out_for_delivery:'🛵 On the way', delivered:'🎉 Delivered', cancelled:'❌ Cancelled' };
+  return map[s] || s;
+}
+
+function orderViaWhatsApp() {
+  const pid = document.getElementById('o-product').value;
+  const qty = document.getElementById('o-qty').value;
+  const addr = document.getElementById('o-addr').value;
+  const prod = products.find(p => p.id == pid);
+  const name = currentUser?.name || document.getElementById('o-name')?.value || '';
+  const phone = currentUser?.phone || document.getElementById('o-phone')?.value || '';
+  const msg = encodeURIComponent(`Hello Naati Koli Farm!\nName: ${name}\nPhone: ${phone}\nProduct: ${prod?.name || ''}\nQty: ${qty} ${prod?.unit || ''}\nAddress: ${addr}\n\nPlease confirm my order.`);
+  window.open(`https://wa.me/919900665887?text=${msg}`, '_blank');
+}
+
+// ── AUTH ─────────────────────────────────────────────────────────────────────
+function showLogin() {
+  document.getElementById('auth-modal').classList.remove('hidden');
+  showStep(1);
+}
+
+function closeModal() {
+  document.getElementById('auth-modal').classList.add('hidden');
+}
+
+function showStep(n) {
+  document.getElementById('auth-step1').classList.toggle('hidden', n !== 1);
+  document.getElementById('auth-step2').classList.toggle('hidden', n !== 2);
+}
+
+async function sendOTP() {
+  const email = document.getElementById('auth-email').value.trim();
+  if (!email) { showAlert('alert-auth1', 'Please enter your email.', 'error'); return; }
+  const btn = event.target;
+  btn.innerHTML = '<span class="spinner"></span>Sending...';
+  btn.disabled = true;
+  try {
+    const res = await fetch(`${API}/api/auth/send-otp`, {
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ email, role: 'customer' })
+    });
+    const data = await res.json();
+    if (data.success) {
+      document.getElementById('otp-sent-msg').textContent = `OTP sent to ${email}. Check your inbox.`;
+      showStep(2);
+    } else {
+      showAlert('alert-auth1', data.error || 'Failed to send OTP.', 'error');
+    }
+  } catch (e) {
+    showAlert('alert-auth1', 'Network error. Check API URL.', 'error');
+  }
+  btn.innerHTML = '<span class="en">Send OTP</span><span class="kn">OTP ಕಳಿಸಿ</span>';
+  btn.disabled = false;
+}
+
+async function verifyOTP() {
+  const email = document.getElementById('auth-email').value.trim();
+  const otp = ['o0','o1','o2','o3','o4','o5'].map(id => document.getElementById(id).value).join('');
+  const name = document.getElementById('auth-name').value.trim();
+  const phone = document.getElementById('auth-phone').value.trim();
+  const address = document.getElementById('auth-addr').value.trim();
+  if (otp.length !== 6) { showAlert('alert-auth2', 'Enter all 6 digits.', 'error'); return; }
+  try {
+    const res = await fetch(`${API}/api/auth/verify-otp`, {
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ email, otp, name, phone, address })
+    });
+    const data = await res.json();
+    if (data.success) {
+      currentToken = data.token;
+      currentUser = data.customer;
+      localStorage.setItem('ctoken', data.token);
+      localStorage.setItem('cuser', JSON.stringify(data.customer));
+      updateNavUser();
+      hideGuestFields();
+      closeModal();
+      showAlert('alert-order', `Welcome, ${currentUser.name}! You are now logged in.`, 'success');
+    } else {
+      showAlert('alert-auth2', data.error || 'Invalid OTP.', 'error');
+    }
+  } catch (e) {
+    showAlert('alert-auth2', 'Network error.', 'error');
+  }
+}
+
+function otpMove(el, prev, next) {
+  if (el.value.length > 1) el.value = el.value.slice(-1);
+  if (el.value && next) document.getElementById(next).focus();
+  if (!el.value && prev) document.getElementById(prev).focus();
+}
+
+function hideGuestFields() {
+  const gf = document.getElementById('guest-fields');
+  const gn = document.getElementById('guest-notice');
+  if (gf) gf.classList.add('hidden');
+  if (gn) gn.classList.add('hidden');
+}
+
+function showGuestFields() {
+  const gf = document.getElementById('guest-fields');
+  const gn = document.getElementById('guest-notice');
+  if (gf) gf.classList.remove('hidden');
+  if (gn) gn.classList.remove('hidden');
+}
+
+function showAlert(id, msg, type) {
+  const el = document.getElementById(id);
+  el.className = `alert alert-${type}`;
+  el.textContent = msg;
+  el.classList.remove('hidden');
+  setTimeout(() => el.classList.add('hidden'), 5000);
+}
+</script>
+</body>
+</html>
