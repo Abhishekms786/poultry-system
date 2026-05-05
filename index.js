@@ -34,8 +34,10 @@ pool.getConnection()
 
 // ── EMAIL ────────────────────────────────────────────────────────────────────
 const transporter = nodemailer.createTransport({
-  service: 'gmail',
-  auth: { user: process.env.GMAIL_USER, pass: process.env.GMAIL_APP_PASSWORD }
+  host: 'smtp-relay.brevo.com',
+  port: 587,
+  secure: false,
+  auth: { user: process.env.BREVO_USER, pass: process.env.BREVO_PASS }
 });
 
 // ── HELPERS ──────────────────────────────────────────────────────────────────
