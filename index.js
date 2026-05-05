@@ -1,9 +1,10 @@
+cat > /home/claude/index.js << 'ENDOFFILE'
 require('dotenv').config();
 const express = require('express');
 const mysql = require('mysql2/promise');
-const nodemailer = require('nodemailer');
 const cors = require('cors');
 const { v4: uuidv4 } = require('uuid');
+const https = require('https');
 
 const app = express();
 app.use(express.json());
@@ -27,33 +28,18 @@ const pool = mysql.createPool({
   connectTimeout: 30000
 });
 
-// Test DB connection on startup
 pool.getConnection()
   .then(conn => { console.log('✅ MySQL connected!'); conn.release(); })
   .catch(err => console.error('❌ MySQL connection failed:', err.message));
 
-// ── EMAIL ────────────────────────────────────────────────────────────────────
-const transporter = nodemailer.createTransport({
-  host: 'smtp-relay.brevo.com',
-  port: 587,
-  secure: false,
-  auth: { user: process.env.BREVO_USER, pass: process.env.BREVO_PASS }
-});
-
-// ── HELPERS ──────────────────────────────────────────────────────────────────
-function generateOTP() { return Math.floor(100000 + Math.random() * 900000).toString(); }
-function generateOrderNumber() {
-  const ts = Date.now().toString().slice(-6);
-  const rand = Math.floor(Math.random() * 1000).toString().padStart(3,'0');
-  return `NKF-${ts}-${rand}`;
-}
+// ── EMAIL (Brevo API) ─────────────────────────────────────────────────────────
 async function sendOTPEmail(email, otp, name='') {
   const greeting = name ? `Hello ${name},` : 'Hello,';
-  await transporter.sendMail({
-    from: `"Naati Koli Farm" <${process.env.GMAIL_USER}>`,
-    to: email,
+  const data = JSON.stringify({
+    sender: { name: 'Naati Koli Farm', email: process.env.BREVO_SENDER_EMAIL || process.env.GMAIL_USER },
+    to: [{ email }],
     subject: `Your OTP — ${otp}`,
-    html: `<div style="font-family:Arial,sans-serif;max-width:480px;margin:0 auto;padding:24px;border:1px solid #e8d5b7;border-radius:12px;">
+    htmlContent: `<div style="font-family:Arial,sans-serif;max-width:480px;margin:0 auto;padding:24px;border:1px solid #e8d5b7;border-radius:12px;">
       <div style="text-align:center;"><span style="font-size:40px;">🐔</span>
       <h2 style="color:#7B3F00;">Naati Koli Farm</h2><p style="color:#6b4c2a;font-size:13px;">Mysore, Karnataka</p></div>
       <p>${greeting}</p><p>Your OTP is:</p>
@@ -62,6 +48,31 @@ async function sendOTPEmail(email, otp, name='') {
       <p style="color:#6b4c2a;font-size:13px;">Valid for <strong>10 minutes</strong>. Do not share.</p>
       <hr style="border:none;border-top:1px solid #e8d5b7;margin:20px 0;">
       <p style="color:#6b4c2a;font-size:12px;text-align:center;">📞 9900665887 | 8095222673</p></div>`
+  });
+
+  return new Promise((resolve, reject) => {
+    const options = {
+      hostname: 'api.brevo.com',
+      path: '/v3/smtp/email',
+      method: 'POST',
+      headers: {
+        'accept': 'application/json',
+        'api-key': process.env.BREVO_API_KEY,
+        'content-type': 'application/json',
+        'content-length': Buffer.byteLength(data)
+      }
+    };
+    const req = https.request(options, (res) => {
+      let body = '';
+      res.on('data', chunk => body += chunk);
+      res.on('end', () => {
+        if (res.statusCode >= 200 && res.statusCode < 300) resolve(body);
+        else reject(new Error(`Brevo API error: ${res.statusCode} ${body}`));
+      });
+    });
+    req.on('error', reject);
+    req.write(data);
+    req.end();
   });
 }
 
@@ -306,6 +317,16 @@ app.get('/api/owner/stats', ownerAuth, async (req, res) => {
   } catch(err) { res.status(500).json({ error: err.message }); }
 });
 
+// ── HELPERS ──────────────────────────────────────────────────────────────────
+function generateOTP() { return Math.floor(100000 + Math.random() * 900000).toString(); }
+function generateOrderNumber() {
+  const ts = Date.now().toString().slice(-6);
+  const rand = Math.floor(Math.random() * 1000).toString().padStart(3,'0');
+  return `NKF-${ts}-${rand}`;
+}
+
 // ── START ─────────────────────────────────────────────────────────────────────
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, '0.0.0.0', () => console.log(`🐔 Naati Koli Farm running on port ${PORT}`));
+ENDOFFILE
+echo "Done!"
