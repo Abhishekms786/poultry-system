@@ -1,0 +1,27 @@
+services:
+  - type: web
+    name: poultry-system
+    env: node
+    buildCommand: npm install
+    startCommand: node index.js
+    envVars:
+      - key: DB_HOST
+        value: mysql-10766437-abhishekms1234-3567.l.aivencloud.com
+      - key: DB_PORT
+        value: 24477
+      - key: DB_USER
+        value: avnadmin
+      - key: DB_PASSWORD
+        value: AVNS_711gYPTCyaMFjC6nZ7J
+      - key: DB_NAME
+        value: naatikoli
+      - key: GMAIL_USER
+        value: poultry.mysore@gmail.com
+      - key: GMAIL_APP_PASSWORD
+        value: somekhhtvsqmhuma
+      - key: OWNER_EMAIL
+        value: poultry.mysore@gmail.com
+      - key: PORT
+        value: 3000
+      - key: JWT_SECRET
+        value: naatikoli-super-secret-key-change-this-2024
