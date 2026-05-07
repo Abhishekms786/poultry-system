@@ -110,6 +110,13 @@ nav{background:var(--brown);padding:12px 16px;display:flex;justify-content:space
 .tab.active{color:var(--brown);border-bottom:2px solid var(--brown);font-weight:600;margin-bottom:-2px;}
 footer{background:var(--brown);color:#fff;padding:18px 16px;text-align:center;font-size:13px;}
 footer a{color:var(--gold);text-decoration:none;}
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;background:white;border-top:2px solid var(--border);display:none;z-index:999;padding:6px 0;}
+.bottom-nav-inner{display:flex;justify-content:space-around;}
+.bnav-btn{display:flex;flex-direction:column;align-items:center;background:none;border:none;font-size:11px;color:var(--muted);cursor:pointer;padding:4px 8px;gap:2px;}
+.bnav-btn.active{color:var(--brown);font-weight:600;}
+.bnav-btn span.icon{font-size:20px;}
+body.logged-in .bottom-nav{display:block;}
+body.logged-in footer{padding-bottom:70px;}
 .spinner{display:inline-block;width:16px;height:16px;border:2px solid rgba(255,255,255,0.4);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;margin-right:6px;}
 @keyframes spin{to{transform:rotate(360deg);}}
 .hidden{display:none!important;}
@@ -135,9 +142,12 @@ footer a{color:var(--gold);text-decoration:none;}
       <span class="kn">ಮೈಸೂರು, ಕರ್ನಾಟಕ</span>
     </div>
   </div>
-  <div class="nav-right">
+  <div class="nav-right" style="display:flex;flex-direction:row;gap:6px;align-items:center;">
     <button id="nav-user-btn" onclick="handleNavBtn()">
       <span class="en">Login</span><span class="kn">ಲಾಗಿನ್</span>
+    </button>
+    <button id="nav-logout-btn" onclick="logout()" style="display:none;background:#e74c3c;color:white;border:none;padding:6px 12px;border-radius:20px;font-size:12px;font-weight:600;cursor:pointer;">
+      🚪 Logout
     </button>
   </div>
 </nav>
@@ -316,6 +326,23 @@ footer a{color:var(--gold);text-decoration:none;}
   </div>
 </div>
 
+<div class="bottom-nav">
+  <div class="bottom-nav-inner">
+    <button class="bnav-btn" onclick="showPage('page-home');setActiveNav(this)">
+      <span class="icon">🏠</span>Home
+    </button>
+    <button class="bnav-btn" onclick="showPage('page-order');setActiveNav(this)">
+      <span class="icon">🛒</span>Order
+    </button>
+    <button class="bnav-btn" onclick="requireLogin('page-orders');setActiveNav(this)">
+      <span class="icon">📦</span>My Orders
+    </button>
+    <button class="bnav-btn" onclick="requireLogin('page-profile');setActiveNav(this)">
+      <span class="icon">👤</span>Profile
+    </button>
+  </div>
+</div>
+
 <footer>
   <div style="font-size:15px;font-weight:600;margin-bottom:4px;">🐔 Naati Koli Farm</div>
   <div>📍 <span class="en">Mysore, Karnataka</span><span class="kn">ಮೈಸೂರು, ಕರ್ನಾಟಕ</span></div>
@@ -363,11 +390,26 @@ function showPage(id) {
 // ── NAV ──────────────────────────────────────────────────────────────────────
 function updateNavUser() {
   const btn = document.getElementById('nav-user-btn');
+  const logoutBtn = document.getElementById('nav-logout-btn');
   if (currentUser) {
-    btn.textContent = `👤 ${currentUser.name.split(' ')[0]}`;
+    btn.textContent = '👤 ' + currentUser.name.split(' ')[0];
+    if (logoutBtn) logoutBtn.style.display = 'flex';
+    document.body.classList.add('logged-in');
   } else {
     btn.innerHTML = '<span class="en">Login</span><span class="kn">ಲಾಗಿನ್</span>';
+    if (logoutBtn) logoutBtn.style.display = 'none';
+    document.body.classList.remove('logged-in');
   }
+}
+
+function setActiveNav(el) {
+  document.querySelectorAll('.bnav-btn').forEach(b => b.classList.remove('active'));
+  if (el) el.classList.add('active');
+}
+
+function requireLogin(page) {
+  if (currentUser) { showPage(page); }
+  else { showLogin(); }
 }
 
 function handleNavBtn() {
@@ -379,11 +421,7 @@ function handleNavBtn() {
 }
 
 function showUserMenu() {
-  if (confirm(`Logged in as ${currentUser.name}\n\nOptions:\n• View My Orders\n• Logout`)) {
-    showPage('page-orders');
-  } else {
-    if (confirm('Logout?')) logout();
-  }
+  showPage('page-orders');
 }
 
 function logout() {
@@ -415,7 +453,7 @@ function renderProducts() {
   grid.innerHTML = products.map(p => `
     <div class="pcard">
       ${p.in_stock ? '<span class="in-badge">✓ Stock</span>' : '<span class="out-badge">Out</span>'}
-      <div class="picon">${p.icon}</div>
+      ${(p.name.toLowerCase().includes('egg') || p.name.toLowerCase().includes('egg') || p.name_kn && p.name_kn.includes('ಮೊಟ್ಟೆ')) ? '<img style="width:100%;height:110px;object-fit:cover;border-radius:10px;margin-bottom:8px;" src="https://abhishekms786.github.io/poultry-system/images/eggs.jpg" alt="Eggs" onerror="this.style.display=\'none\'">' : (p.name.toLowerCase().includes('live') || p.name.toLowerCase().includes('hen')) ? '<img style="width:100%;height:110px;object-fit:cover;border-radius:10px;margin-bottom:8px;" src="https://abhishekms786.github.io/poultry-system/images/chicken.jpg" alt="Chicken" onerror="this.style.display=\'none\'">' : '<div class="picon">' + p.icon + '</div>'}
       <div class="pname">${p.name}${p.name_kn ? `<span class="kn" style="display:none;font-family:'Tiro Kannada',serif;">${p.name_kn}</span>` : ''}</div>
       <div class="pdesc">${p.description || ''}${p.description_kn ? `<span class="kn" style="display:none;font-family:'Tiro Kannada',serif;">${p.description_kn}</span>` : ''}</div>
       <div class="pprice">₹${p.price} <span class="punit">/${p.unit}</span></div>
