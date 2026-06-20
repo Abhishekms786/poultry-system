@@ -6,22 +6,22 @@ services:
     startCommand: node index.js
     envVars:
       - key: DB_HOST
-        value: mysql-10766437-abhishekms1234-3567.l.aivencloud.com
+        sync: false
       - key: DB_PORT
-        value: 24477
+        sync: false
       - key: DB_USER
-        value: avnadmin
+        sync: false
       - key: DB_PASSWORD
-        value: AVNS_711gYPTCyaMFjC6nZ7J
+        sync: false
       - key: DB_NAME
-        value: naatikoli
+        sync: false
       - key: GMAIL_USER
-        value: poultry.mysore@gmail.com
+        sync: false
       - key: GMAIL_APP_PASSWORD
-        value: somekhhtvsqmhuma
+        sync: false
       - key: OWNER_EMAIL
-        value: poultry.mysore@gmail.com
+        sync: false
       - key: PORT
         value: 3000
       - key: JWT_SECRET
-        value: naatikoli-super-secret-key-change-this-2024
+        sync: false
