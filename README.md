@@ -37,8 +37,9 @@ A full-stack e-commerce platform designed to manage poultry business operations 
 
 ### 📋 For Farm Owners
 - Secure **OTP-based email login** (no password needed)
-- Add, edit, and delete products from inventory with **image upload support**
-- Upload product photos directly from the dashboard — images stored in MySQL
+- Add, **edit**, and delete products from inventory with **image upload support**
+- Full product edit modal — update name (English & Kannada), description, price, unit, stock status, and replace product image
+- Upload product photos directly from the dashboard — images stored in MySQL, served via REST API
 - View and manage all customer orders in real-time
 - Update order status with one click (triggers automated customer email)
 - Session-based authentication with 24-hour token expiry
@@ -52,9 +53,10 @@ A full-stack e-commerce platform designed to manage poultry business operations 
 - Product image upload (stored as LONGBLOB in MySQL, served via REST API)
 - Session token management (owner + customer sessions with expiry)
 - Guest checkout support (no registration required)
+- **Responsive design** — mobile-first UI that expands to full 960px desktop layout
 - UptimeRobot monitoring to prevent cold-start delays on Render free tier
 - Jenkinsfile for CI/CD pipeline
-- Deployed: Frontend on Vercel, Backend on Render
+- Deployed: Frontend on Vercel, Backend on Render (MySQL on Aiven)
 
 ---
 
