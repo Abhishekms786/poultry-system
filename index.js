@@ -194,8 +194,14 @@ app.post('/api/owner/verify-otp', async (req, res) => {
 
 app.get('/api/products', async (req, res) => {
   try {
-    // Exclude binary image_data from list — served via /api/products/:id/image
-    const [rows] = await pool.query('SELECT id,name,name_kn,description,description_kn,price,unit,icon,in_stock,updated_at,(image_data IS NOT NULL) as has_image FROM products ORDER BY id');
+    let rows;
+    try {
+      // Try with image column (exists after first image upload)
+      [rows] = await pool.query('SELECT id,name,name_kn,description,description_kn,price,unit,icon,in_stock,updated_at,(image_data IS NOT NULL) as has_image FROM products ORDER BY id');
+    } catch(e) {
+      // Fallback: image columns don't exist yet, use basic select
+      [rows] = await pool.query('SELECT id,name,name_kn,description,description_kn,price,unit,icon,in_stock,updated_at,0 as has_image FROM products ORDER BY id');
+    }
     res.json(rows);
   } catch(err) { res.status(500).json({ error: err.message }); }
 });
