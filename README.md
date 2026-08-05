@@ -1,43 +1,60 @@
 # Naati Koli Farm — Poultry E-Commerce & Order Management Platform
 
-![Status](https://img.shields.io/badge/Status-Active-brightgreen) ![License](https://img.shields.io/badge/License-MIT-blue) ![Node.js](https://img.shields.io/badge/Node.js-v14+-green) ![MySQL](https://img.shields.io/badge/MySQL-8.0-blue)
+![Status](https://img.shields.io/badge/Status-Active-brightgreen)
+![Node.js](https://img.shields.io/badge/Node.js-v14+-green?logo=node.js)
+![MySQL](https://img.shields.io/badge/MySQL-8.0-blue?logo=mysql)
+![Express](https://img.shields.io/badge/Express.js-black?logo=express)
+![Brevo](https://img.shields.io/badge/Brevo-Email_API-blue)
+![Render](https://img.shields.io/badge/Render-Backend-purple)
+![Vercel](https://img.shields.io/badge/Vercel-Frontend-black?logo=vercel)
+![Jenkins](https://img.shields.io/badge/Jenkins-CI/CD-orange?logo=jenkins)
 
 A full-stack e-commerce platform designed to manage poultry business operations for **Shiva Murthy Poultry Farm**, Choganahalli, Mysuru. The platform connects farm owners with customers, enabling efficient order management, product catalog management, and real-time order tracking.
 
-**🚀 Live Platform:**
-- 🛒 **Customer Storefront:** https://abhishekms786.github.io/poultry-system/index2.html
-- 📊 **Owner Dashboard:** https://abhishekms786.github.io/poultry-system/
+---
+
+## 🚀 Live Platform
+
+| Site | URL |
+|---|---|
+| 🛒 **Customer Storefront** | [poultry-system-ivory.vercel.app](https://poultry-system-ivory.vercel.app) |
+| 📊 **Owner Dashboard** | [poultry-system-ivory.vercel.app/owner](https://poultry-system-ivory.vercel.app/owner) |
+| 🔧 **Backend API** | [poultry-system-mrqh.onrender.com](https://poultry-system-mrqh.onrender.com) |
+| 📁 **GitHub Repository** | [github.com/Abhishekms786/poultry-system](https://github.com/Abhishekms786/poultry-system) |
 
 ---
 
-## 🎯 Features
+## ✨ Features
 
-### For Customers
-- ✅ Browse live product catalog (Desi Chicken, Eggs, Dressed Chicken, etc.)
-- ✅ View detailed product information with pricing in multiple units (kg, piece, litre)
-- ✅ Place orders with quantity selection
-- ✅ Real-time order status tracking (Pending → Confirmed → On the Way → Delivered)
-- ✅ Email notifications at each order stage
-- ✅ Bilingual support (English & Kannada)
-- ✅ Responsive mobile-friendly interface
+### 🛒 For Customers
+- Browse live product catalog (Desi Chicken, Eggs, Dressed Chicken, etc.)
+- View product images, descriptions, and pricing in multiple units (kg, piece, egg, litre)
+- Place orders as a **registered user or guest** (no login required for guests)
+- Real-time order status tracking: Pending → Confirmed → On the Way → Delivered
+- Email notifications at every order stage
+- Bilingual support (English & Kannada)
+- Responsive, mobile-first interface
 
-### For Farm Owners
-- 📱 Dedicated owner dashboard to manage operations
-- ➕ Add, edit, and delete products from inventory
-- 📋 View all customer orders in real-time
-- 🔄 Update order status and track fulfillment
-- 🔐 Secure email-based OTP authentication (no passwords to remember)
-- 📊 Order history and sales tracking
-- 💌 Automated email notifications to customers
+### 📋 For Farm Owners
+- Secure **OTP-based email login** (no password needed)
+- Add, edit, and delete products from inventory with **image upload support**
+- Upload product photos directly from the dashboard — images stored in MySQL
+- View and manage all customer orders in real-time
+- Update order status with one click (triggers automated customer email)
+- Session-based authentication with 24-hour token expiry
+- WhatsApp quick-contact button for each customer
+- Order search, filter by status, and customer management
 
-### Technical Features
-- 🔒 Email-based OTP authentication (secure, password-less)
-- 🌐 Bilingual product listings (English + Kannada)
-- 📧 Transactional email via Brevo API (reliable delivery)
-- 🗄️ MySQL database for persistent storage
-- ⚡ Express.js REST API for backend operations
-- 🚀 Deployed on Render (backend) & GitHub Pages (frontend)
-- 🏃 UptimeRobot monitoring to prevent cold-start delays
+### ⚙️ Technical Features
+- 5-table MySQL schema: customers, products, orders, OTPs, sessions
+- Email-based OTP authentication for both owner and customers (via Brevo API)
+- Automated transactional emails at every order lifecycle stage
+- Product image upload (stored as LONGBLOB in MySQL, served via REST API)
+- Session token management (owner + customer sessions with expiry)
+- Guest checkout support (no registration required)
+- UptimeRobot monitoring to prevent cold-start delays on Render free tier
+- Jenkinsfile for CI/CD pipeline
+- Deployed: Frontend on Vercel, Backend on Render
 
 ---
 
@@ -47,333 +64,150 @@ A full-stack e-commerce platform designed to manage poultry business operations 
 ┌─────────────────────────────────────────────────────────────┐
 │                    CLIENT SIDE (Frontend)                   │
 ├─────────────────────────────────────────────────────────────┤
-│  ┌──────────────────┐        ┌──────────────────────┐        │
-│  │ Customer Site    │        │   Owner Dashboard    │        │
-│  │ (index2.html)    │        │ (poultry-system/)    │        │
-│  │ - Browse catalog │        │ - Manage inventory   │        │
-│  │ - Place orders   │        │ - View orders        │        │
-│  │ - Track status   │        │ - Update status      │        │
-│  └────────┬─────────┘        └──────────┬───────────┘        │
-│           └─────────────┬───────────────┘                     │
-│        Hosted on GitHub Pages                                │
-│        (Static HTML/CSS/JavaScript)                          │
+│  ┌──────────────────────┐    ┌──────────────────────────┐   │
+│  │  Customer Storefront │    │    Owner Dashboard       │   │
+│  │  (index2.html)       │    │    (index.html)          │   │
+│  │  - Browse catalog    │    │  - Manage products       │   │
+│  │  - Place orders      │    │  - Upload images         │   │
+│  │  - Track status      │    │  - View/update orders    │   │
+│  └──────────┬───────────┘    └────────────┬─────────────┘   │
+│             └──────────────┬──────────────┘                  │
+│          Hosted on Vercel (Static HTML/CSS/JS)               │
 └──────────────────────────┬──────────────────────────────────┘
-                           │ HTTPS API Calls
-                           ↓
-┌─────────────────────────────────────────────────────────────┐
-│                 SERVER SIDE (Backend API)                   │
-├─────────────────────────────────────────────────────────────┤
-│           Node.js + Express.js REST API                      │
-│  - POST /api/auth/send-otp       (Generate OTP)             │
-│  - POST /api/auth/verify-otp     (Login with OTP)           │
-│  - GET  /api/products            (Fetch all products)       │
-│  - GET  /api/orders              (Fetch orders)             │
-│  - POST /api/orders              (Create new order)         │
-│  - PUT  /api/orders/:id          (Update order status)      │
-│  - DELETE /api/products/:id      (Delete product)           │
-│        Hosted on Render.com                                  │
-└──────────────────────┬──────────────────────────────────────┘
-                       ↓
-┌─────────────────────────────────────────────────────────────┐
-│                    DATABASE (MySQL)                          │
-├─────────────────────────────────────────────────────────────┤
-│  - users, products, orders, order_items                     │
-│        Hosted on Aiven.io                                   │
+                           │ HTTPS REST API Calls
+┌──────────────────────────▼──────────────────────────────────┐
+│                BACKEND (Node.js + Express)                   │
+│  - REST API (products, orders, auth, images)                 │
+│  - OTP generation & email via Brevo                          │
+│  - Session token management                                  │
+│  - Image upload (multer → MySQL LONGBLOB)                    │
+│  Deployed on Render                                          │
+└──────────────────────────┬──────────────────────────────────┘
+                           │
+┌──────────────────────────▼──────────────────────────────────┐
+│                  DATABASE (MySQL on Aiven)                   │
+│  Tables: customers, products, orders, otps,                  │
+│          owner_sessions, customer_sessions                   │
 └─────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## 🛠️ Tech Stack
+## 🗄️ Database Schema
 
-| Layer | Technology | Purpose |
-|-------|-----------|---------│
-| Frontend | HTML5, CSS3, JavaScript | Customer site & owner dashboard |
-| Hosting (Frontend) | GitHub Pages | Static site hosting |
-| Backend | Node.js, Express.js | REST API server |
-| Hosting (Backend) | Render.com | Cloud deployment |
-| Database | MySQL | Data storage |
-| DB Hosting | Aiven.io | Managed MySQL |
-| Email Service | Brevo API | Transactional emails |
-| Authentication | Email OTP | Secure login |
-| Monitoring | UptimeRobot | Uptime tracking |
+| Table | Purpose |
+|---|---|
+| `customers` | Registered customers (name, email, phone, address) |
+| `products` | Product catalog with image binary (LONGBLOB), bilingual names |
+| `orders` | Full order lifecycle with guest + registered support |
+| `otps` | Temporary OTP codes with expiry (10 min) |
+| `owner_sessions` | Owner login tokens (24hr expiry) |
+| `customer_sessions` | Customer login tokens (7-day expiry) |
 
 ---
 
-## 📋 Prerequisites
+## 🔌 API Endpoints
 
-- Node.js (v14+)
-- npm
-- Git
-- MySQL (Aiven recommended)
-- Brevo Account
-- Render Account
-- GitHub Account
+| Method | Endpoint | Auth | Description |
+|---|---|---|---|
+| POST | `/api/auth/send-otp` | — | Send OTP to customer email |
+| POST | `/api/auth/verify-otp` | — | Verify OTP, return session token |
+| POST | `/api/owner/verify-otp` | — | Owner OTP login |
+| GET | `/api/products` | — | List all products |
+| POST | `/api/products` | Owner | Add new product (with image upload) |
+| PUT | `/api/products/:id` | Owner | Update price / stock |
+| DELETE | `/api/products/:id` | Owner | Delete product |
+| GET | `/api/products/:id/image` | — | Serve product image |
+| POST | `/api/orders` | — | Place order (guest or registered) |
+| GET | `/api/orders/my` | Customer | Get my order history |
+| GET | `/api/owner/orders` | Owner | All orders (filter + search) |
+| PUT | `/api/owner/orders/:id` | Owner | Update order status |
+| GET | `/api/owner/customers` | Owner | All customers with stats |
+| GET | `/api/owner/stats` | Owner | Dashboard stats + top products |
+| GET | `/api/health` | — | Health check |
 
 ---
 
-## 🚀 Quick Start
+## 💻 Technology Stack
 
-### 1. Clone Repository
-```bash
-git clone https://github.com/Abhishekms786/poultry-system.git
-cd poultry-system
+| Layer | Technology |
+|---|---|
+| **Frontend** | HTML5, CSS3, Vanilla JavaScript |
+| **Backend** | Node.js, Express.js |
+| **Database** | MySQL (Aiven cloud) |
+| **Email** | Brevo (SMTP API) — OTP + order status notifications |
+| **Image Upload** | Multer (memory storage → MySQL LONGBLOB) |
+| **Auth** | Email OTP + UUID session tokens |
+| **Deployment** | Vercel (frontend), Render (backend) |
+| **Monitoring** | UptimeRobot |
+| **CI/CD** | Jenkinsfile pipeline |
+
+---
+
+## 📁 Folder Structure
+
+```text
+📦 poultry-system
+ ┣ 📜 index.js          # Express backend (all API routes, auth, email, image upload)
+ ┣ 📜 index.html        # Owner Dashboard (SPA — auth, products, orders, customers)
+ ┣ 📜 index2.html       # Customer Storefront (browse, order, track)
+ ┣ 📜 db.sql            # MySQL schema and seed products
+ ┣ 📜 vercel.json       # Vercel routing config (/ → customer, /owner → dashboard)
+ ┣ 📜 render.yaml       # Render deployment config
+ ┣ 📜 Jenkinsfile       # Jenkins CI/CD pipeline
+ ┣ 📜 package.json      # Node.js dependencies
+ ┗ 📂 images/           # Static image assets
 ```
 
-### 2. Install Dependencies
+---
+
+## 🚀 Setup & Installation
+
+### Prerequisites
+- Node.js v14+
+- MySQL database
+
+### Environment Variables
+
+Create a `.env` file:
+
+```env
+DB_HOST=your_mysql_host
+DB_PORT=3306
+DB_USER=your_db_user
+DB_PASSWORD=your_db_password
+DB_NAME=naatikoli
+OWNER_EMAIL=your_owner_email@gmail.com
+BREVO_API_KEY=your_brevo_api_key
+BREVO_SENDER_EMAIL=noreply@yourdomain.com
+```
+
+### Run Locally
+
 ```bash
 npm install
+npm run dev      # uses nodemon
+# OR
+npm start        # production
 ```
 
-### 3. Create `.env` File
-```env
-DB_HOST=your_database_host
-DB_PORT=3306
-DB_USER=your_database_user
-DB_PASSWORD=your_database_password
-DB_NAME=poultry_farm_db
+### Database Setup
 
-BREVO_API_KEY=your_brevo_api_key
-BREVO_SENDER_EMAIL=farm_email@example.com
-
-OWNER_EMAIL=farm_owner@example.com
-
-JWT_SECRET=generate_random_secret_string
-
-PORT=3000
-
-CUSTOMER_URL=http://localhost:5500
-OWNER_URL=http://localhost:5501
-```
-
-### 4. Start Backend
 ```bash
-node index.js
-```
-
-### 5. Start Frontend (Another Terminal)
-```bash
-python -m http.server 5500
-```
-
-Visit:
-- Customer: http://localhost:5500/index2.html
-- Owner: http://localhost:5501/
-
----
-
-## 📦 Project Structure
-
-```
-poultry-system/
-├── index.js                 # Express server
-├── index2.html              # Customer site
-├── poultry-system/          # Owner dashboard
-│   ├── index.html
-│   ├── css/style.css
-│   └── js/script.js
-├── .env                     # Credentials (not in git)
-├── .gitignore
-├── package.json
-└── README.md
+# Run db.sql once in your MySQL console to create tables and seed products
+mysql -u user -p naatikoli < db.sql
 ```
 
 ---
 
-## 🔐 Authentication
+## 🔮 Future Scope
 
-**Email-Based OTP Flow:**
-1. Owner enters email → Backend generates OTP
-2. Backend sends OTP via Brevo
-3. Owner enters OTP → Backend verifies
-4. Backend issues JWT session token
-5. Owner logged in securely
-
-**Why OTP?**
-- No password storage
-- Phishing-resistant
-- Easy to use
+- Push notifications (FCM) for real-time order updates
+- Inventory/stock quantity tracking
+- Revenue analytics dashboard with charts
+- Customer loyalty points system
+- Expand to multiple farm locations
 
 ---
 
-## 💾 Database Schema
-
-```sql
-CREATE TABLE users (
-  id INT PRIMARY KEY AUTO_INCREMENT,
-  email VARCHAR(255) UNIQUE NOT NULL,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
-CREATE TABLE products (
-  id INT PRIMARY KEY AUTO_INCREMENT,
-  name VARCHAR(255) NOT NULL,
-  price DECIMAL(10, 2),
-  unit VARCHAR(50),
-  stock INT,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
-CREATE TABLE orders (
-  id INT PRIMARY KEY AUTO_INCREMENT,
-  customer_email VARCHAR(255),
-  customer_phone VARCHAR(20),
-  status VARCHAR(50) DEFAULT 'Pending',
-  total_amount DECIMAL(10, 2),
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
-CREATE TABLE order_items (
-  id INT PRIMARY KEY AUTO_INCREMENT,
-  order_id INT NOT NULL,
-  product_id INT NOT NULL,
-  quantity DECIMAL(10, 2),
-  FOREIGN KEY (order_id) REFERENCES orders(id),
-  FOREIGN KEY (product_id) REFERENCES products(id)
-);
-```
-
----
-
-## 🚀 Deployment
-
-### Frontend (GitHub Pages)
-```bash
-git add .
-git commit -m "Update"
-git push origin main
-```
-Auto-deploys to: https://abhishekms786.github.io/poultry-system/
-
-### Backend (Render)
-1. Go to Render.com Dashboard
-2. Create new Web Service
-3. Connect GitHub repo
-4. Set .env variables
-5. Deploy!
-
----
-
-## 📞 API Endpoints
-
-### Auth
-```
-POST /api/auth/send-otp
-{ email: "farm@example.com" }
-
-POST /api/auth/verify-otp
-{ email: "farm@example.com", otp: "123456" }
-```
-
-### Products
-```
-GET  /api/products
-POST /api/products
-PUT  /api/products/:id
-DELETE /api/products/:id
-```
-
-### Orders
-```
-GET  /api/orders
-POST /api/orders
-PUT  /api/orders/:id
-```
-
----
-
-## 📧 Email Notifications
-
-| Event | Recipient | Type |
-|-------|-----------|------|
-| Order Placed | Customer | Confirmation |
-| Order Confirmed | Customer | Acceptance |
-| Order Dispatched | Customer | On the Way |
-| Order Delivered | Customer | Delivery Confirmation |
-| Cancelled | Customer | Cancellation |
-
----
-
-## 🐛 Troubleshooting
-
-**Backend not starting?**
-```bash
-lsof -i :3000
-kill -9 <PID>
-node index.js
-```
-
-**Database error?**
-- Check `.env` credentials
-- Verify MySQL running
-
-**Emails not sending?**
-- Verify Brevo API key
-- Check sender email verified in Brevo
-- Check spam folder
-
-**Frontend not loading?**
-- Ensure backend is running
-- Clear browser cache
-- Check console (F12)
-
----
-
-## 📈 Future Enhancements
-
-- [ ] Mobile app (React Native)
-- [ ] Payment gateway (Razorpay)
-- [ ] SMS notifications
-- [ ] WhatsApp updates
-- [ ] Analytics dashboard
-- [ ] Low-stock alerts
-- [ ] Multi-location support
-- [ ] Loyalty program
-- [ ] Delivery tracking
-
----
-
-## 🤝 Contributing
-
-1. Fork repository
-2. Create feature branch
-3. Commit changes
-4. Push & open PR
-
----
-
-## 📄 License
-
-MIT License — see LICENSE file
-
----
-
-## 👤 Developer
-
-**Abhishek M S**
-- 📧 abhishekms1234.x@gmail.com
-- 🐙 [@Abhishekms786](https://github.com/Abhishekms786)
-- 💼 [linkedin.com/in/abhishekms786](https://linkedin.com/in/abhishekms786)
-
-## 🏪 Farm Business
-
-**Shiva Murthy Poultry Farm**
-- 📍 Choganahalli, Mysuru, Karnataka
-- 🐔 ~5,000 bird poultry farm
-- 📞 Order via online platform
-
----
-
-## 🙏 Acknowledgments
-
-- Shiva Murthy Poultry Farm
-- Render.com
-- Aiven.io
-- Brevo
-- GitHub
-- UptimeRobot
-
----
-
-**Status:** Production Ready ✅  
-**Last Updated:** July 2026
+**Developed by:** Abhishek M S
