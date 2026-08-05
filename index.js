@@ -206,11 +206,29 @@ app.get('/api/products', async (req, res) => {
   } catch(err) { res.status(500).json({ error: err.message }); }
 });
 
-app.put('/api/products/:id', ownerAuth, async (req, res) => {
+app.put('/api/products/:id', ownerAuth, upload.single('image'), async (req, res) => {
   try {
-    const { price, in_stock, name, description } = req.body;
-    await pool.query('UPDATE products SET price=COALESCE(?,price),in_stock=COALESCE(?,in_stock),name=COALESCE(?,name),description=COALESCE(?,description) WHERE id=?',[price??null,in_stock??null,name??null,description??null,req.params.id]);
-    const [updated] = await pool.query('SELECT * FROM products WHERE id=?',[req.params.id]);
+    const { price, in_stock, name, name_kn, description, unit } = req.body;
+    // Ensure image columns exist
+    try {
+      await pool.query('ALTER TABLE products ADD COLUMN image_data LONGBLOB');
+      await pool.query('ALTER TABLE products ADD COLUMN image_type VARCHAR(50)');
+    } catch(e) { /* already exist */ }
+    let q = 'UPDATE products SET price=COALESCE(?,price),in_stock=COALESCE(?,in_stock),name=COALESCE(?,name),name_kn=COALESCE(?,name_kn),description=COALESCE(?,description),unit=COALESCE(?,unit)';
+    const params = [price??null, in_stock??null, name??null, name_kn??null, description??null, unit??null];
+    if (req.file) {
+      q += ',image_data=?,image_type=?';
+      params.push(req.file.buffer, req.file.mimetype);
+    }
+    q += ' WHERE id=?';
+    params.push(req.params.id);
+    await pool.query(q, params);
+    let updated;
+    try {
+      [updated] = await pool.query('SELECT id,name,name_kn,description,description_kn,price,unit,icon,in_stock,updated_at,(image_data IS NOT NULL) as has_image FROM products WHERE id=?',[req.params.id]);
+    } catch(e) {
+      [updated] = await pool.query('SELECT id,name,name_kn,description,description_kn,price,unit,icon,in_stock,updated_at,0 as has_image FROM products WHERE id=?',[req.params.id]);
+    }
     res.json({ success: true, product: updated[0] });
   } catch(err) { res.status(500).json({ error: err.message }); }
 });

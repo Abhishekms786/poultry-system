@@ -13,7 +13,18 @@
   --bg:#f8f4ef;--card:#fff;
 }
 *{box-sizing:border-box;margin:0;padding:0;}
-body{font-family:'Poppins',sans-serif;background:var(--bg);color:var(--text);max-width:520px;margin:0 auto;min-height:100vh;}
+body{font-family:'Poppins',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
+.wrap{max-width:960px;margin:0 auto;}
+@media(min-width:768px){
+  body{background:#ede8e0;}
+  .topbar{position:sticky;top:0;z-index:100;}
+  #dashboard .page{max-width:960px;margin:0 auto;padding:24px 32px 100px;}
+  .stats-grid{grid-template-columns:repeat(4,1fr);}
+  .bottom-nav{max-width:960px;left:50%;transform:translateX(-50%);border-radius:16px 16px 0 0;}
+  .prod-list-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+  .ocard-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+  .auth-screen{max-width:460px;margin:0 auto;}
+}
 
 /* AUTH */
 .auth-screen{min-height:100vh;display:flex;flex-direction:column;justify-content:center;padding:24px;}
@@ -125,6 +136,12 @@ input:checked+.sld:before{transform:translateX(22px);}
 .empty{text-align:center;padding:30px;color:var(--muted);font-size:14px;}
 .add-prod-btn{width:100%;padding:12px;background:var(--brown-l);color:var(--brown);border:2px dashed var(--brown);border-radius:12px;font-size:14px;font-weight:600;cursor:pointer;margin-bottom:14px;}
 .add-form{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px;margin-bottom:14px;}
+/* EDIT MODAL */
+.edit-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:200;display:flex;align-items:center;justify-content:center;padding:16px;}
+.edit-modal{background:#fff;border-radius:18px;padding:22px;width:100%;max-width:480px;max-height:90vh;overflow-y:auto;}
+.edit-modal h3{font-size:16px;font-weight:600;color:var(--brown);margin-bottom:16px;}
+.edit-btn{background:#eff6ff;color:#1d4ed8;border:1px solid #93c5fd;border-radius:8px;padding:6px 12px;font-size:12px;cursor:pointer;font-family:'Poppins',sans-serif;margin-right:6px;}
+.del-btn{background:#fde8e8;color:#a32d2d;border:1px solid #e24b4a;border-radius:8px;padding:6px 12px;font-size:12px;cursor:pointer;font-family:'Poppins',sans-serif;}
 </style>
 </head>
 <body>
@@ -257,7 +274,40 @@ input:checked+.sld:before{transform:translateX(22px);}
       <button class="btn-main" onclick="addProduct()">Add Product</button>
     </div>
 
-    <div id="products-list"></div>
+    <div id="products-list" class="prod-list-grid"></div>
+  </div>
+
+  <!-- EDIT PRODUCT MODAL -->
+  <div id="edit-overlay" class="edit-overlay hidden">
+    <div class="edit-modal">
+      <h3>✏️ Edit Product</h3>
+      <div id="alert-edit"></div>
+      <div class="frow">
+        <div class="fg"><label>Name (English)</label><input type="text" id="ep-name"></div>
+        <div class="fg"><label>Name (ಕನ್ನಡ)</label><input type="text" id="ep-namekn"></div>
+      </div>
+      <div class="fg"><label>Description</label><input type="text" id="ep-desc"></div>
+      <div class="frow">
+        <div class="fg"><label>Price (₹)</label><input type="number" id="ep-price" min="1"></div>
+        <div class="fg"><label>Unit</label><select id="ep-unit"><option>kg</option><option>egg</option><option>piece</option><option>litre</option></select></div>
+      </div>
+      <div class="fg">
+        <label>Stock Status</label>
+        <select id="ep-stock">
+          <option value="1">✅ In Stock</option>
+          <option value="0">❌ Out of Stock</option>
+        </select>
+      </div>
+      <div class="fg">
+        <label>Replace Image (optional)</label>
+        <input type="file" id="ep-image" accept="image/*" onchange="previewEditImage(this)" style="padding:6px;">
+        <div id="ep-img-preview" style="margin-top:8px;">
+          <img id="ep-img-thumb" style="width:100%;max-height:150px;object-fit:cover;border-radius:10px;border:1.5px solid var(--border);">
+        </div>
+      </div>
+      <button class="btn-main" onclick="saveEditProduct()">💾 Save Changes</button>
+      <button class="btn-sec" onclick="closeEditModal()">Cancel</button>
+    </div>
   </div>
 
   <!-- CUSTOMERS PAGE -->
@@ -501,27 +551,24 @@ function renderProducts() {
   document.getElementById('products-list').innerHTML = products.map(p => `
     <div class="prod-card">
       ${p.has_image
-        ? `<img src="${API}/api/products/${p.id}/image" style="width:100%;height:140px;object-fit:cover;border-radius:10px;margin-bottom:10px;border:1px solid var(--border);" onerror="this.style.display='none'">`
-        : `<div style="font-size:36px;text-align:center;margin-bottom:8px;">${p.icon || '\ud83c\udf57'}</div>`
+        ? `<img src="${API}/api/products/${p.id}/image" style="width:100%;height:160px;object-fit:cover;border-radius:10px;margin-bottom:10px;border:1px solid var(--border);" onerror="this.style.display='none'">`
+        : `<div style="font-size:42px;text-align:center;margin-bottom:8px;padding:16px 0;">${p.icon || '\ud83c\udf57'}</div>`
       }
       <div class="prod-header">
-        <div>
-          <div class="prod-name">${p.name}</div>
-          <div style="font-size:11px;color:var(--muted);">${p.description || ''}</div>
+        <div style="flex:1;min-width:0;">
+          <div class="prod-name" style="font-size:14px;">${p.name}</div>
+          <div style="font-size:11px;color:var(--muted);margin-top:2px;">${p.description || ''}</div>
         </div>
-        <label class="toggle">
+        <label class="toggle" style="margin-left:8px;flex-shrink:0;">
           <input type="checkbox" ${p.in_stock ? 'checked' : ''} onchange="toggleStock(${p.id},this.checked)">
           <span class="sld"></span>
         </label>
       </div>
-      <div style="font-size:12px;color:var(--muted);margin-bottom:6px;">${p.in_stock ? '\u2705 In Stock' : '\u274c Out of Stock'}</div>
-      <div class="price-edit-row">
-        <span style="font-size:15px;">\u20b9</span>
-        <input class="price-input" type="number" id="price-${p.id}" value="${p.price}" min="1">
-        <span style="font-size:13px;color:var(--muted);">/${p.unit}</span>
-        <button class="save-btn" onclick="updatePrice(${p.id})">Save</button>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:8px;">${p.in_stock ? '\u2705 In Stock' : '\u274c Out of Stock'} &nbsp;|&nbsp; \u20b9${parseFloat(p.price).toFixed(2)}/${p.unit}</div>
+      <div style="display:flex;gap:6px;">
+        <button class="edit-btn" style="flex:1;" onclick="openEditModal(${p.id})">\u270f\ufe0f Edit</button>
+        <button class="del-btn" onclick="deleteProduct(${p.id},'${p.name.replace(/'/g,'\\u0027')}')">\ud83d\uddd1\ufe0f Delete</button>
       </div>
-      <button onclick="deleteProduct(${p.id},'${p.name.replace(/'/g,'\\&apos;')}')" style="width:100%;margin-top:8px;padding:8px;background:#fde8e8;color:#a32d2d;border:1px solid #e24b4a;border-radius:8px;font-size:13px;cursor:pointer;font-family:'Poppins',sans-serif;">🗑️ Delete Product</button>
     </div>
   `).join('');
 }
@@ -574,23 +621,18 @@ async function addProduct() {
     if (imageFile) formData.append('image', imageFile);
     const res = await fetch(`${API}/api/products`, {
       method: 'POST',
-      headers: { 'Authorization': `Bearer ${ownerToken}` }, // NO Content-Type — browser sets it for FormData
+      headers: { 'Authorization': `Bearer ${ownerToken}` },
       body: formData
     });
     const data = await res.json();
     if (data.success) {
       toggleAddForm();
-      document.getElementById('np-name').value = '';
-      document.getElementById('np-namekn').value = '';
-      document.getElementById('np-price').value = '';
-      document.getElementById('np-desc').value = '';
+      ['np-name','np-namekn','np-price','np-desc'].forEach(id => document.getElementById(id).value = '');
       document.getElementById('np-image').value = '';
       document.getElementById('np-img-preview').style.display = 'none';
       loadProducts();
       showAlert('alert-dash', `Product "${name}" added!`, 'success');
-    } else {
-      showAlert('alert-prod', data.error, 'error');
-    }
+    } else { showAlert('alert-prod', data.error, 'error'); }
   } catch (e) { showAlert('alert-prod', 'Failed to add.', 'error'); }
 }
 
@@ -598,11 +640,80 @@ function previewNewImage(input) {
   const file = input.files[0];
   if (!file) { document.getElementById('np-img-preview').style.display = 'none'; return; }
   const reader = new FileReader();
-  reader.onload = e => {
-    document.getElementById('np-img-thumb').src = e.target.result;
-    document.getElementById('np-img-preview').style.display = 'block';
-  };
+  reader.onload = e => { document.getElementById('np-img-thumb').src = e.target.result; document.getElementById('np-img-preview').style.display = 'block'; };
   reader.readAsDataURL(file);
+}
+
+function previewEditImage(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => { document.getElementById('ep-img-thumb').src = e.target.result; };
+  reader.readAsDataURL(file);
+}
+
+let editingProductId = null;
+
+function openEditModal(id) {
+  const p = products.find(x => x.id === id);
+  if (!p) return;
+  editingProductId = id;
+  document.getElementById('ep-name').value = p.name || '';
+  document.getElementById('ep-namekn').value = p.name_kn || '';
+  document.getElementById('ep-desc').value = p.description || '';
+  document.getElementById('ep-price').value = p.price;
+  document.getElementById('ep-unit').value = p.unit || 'kg';
+  document.getElementById('ep-stock').value = p.in_stock ? '1' : '0';
+  document.getElementById('ep-image').value = '';
+  // Show current image
+  const thumb = document.getElementById('ep-img-thumb');
+  if (p.has_image) {
+    thumb.src = `${API}/api/products/${id}/image`;
+    document.getElementById('ep-img-preview').style.display = 'block';
+  } else {
+    thumb.src = '';
+    document.getElementById('ep-img-preview').style.display = 'none';
+  }
+  document.getElementById('edit-overlay').classList.remove('hidden');
+}
+
+function closeEditModal() {
+  document.getElementById('edit-overlay').classList.add('hidden');
+  editingProductId = null;
+}
+
+async function saveEditProduct() {
+  const id = editingProductId;
+  if (!id) return;
+  const name = document.getElementById('ep-name').value.trim();
+  const namekn = document.getElementById('ep-namekn').value.trim();
+  const desc = document.getElementById('ep-desc').value.trim();
+  const price = document.getElementById('ep-price').value;
+  const unit = document.getElementById('ep-unit').value;
+  const inStock = document.getElementById('ep-stock').value;
+  const imageFile = document.getElementById('ep-image').files[0];
+  if (!name || !price) { showAlert('alert-edit', 'Name and price required.', 'error'); return; }
+  try {
+    const formData = new FormData();
+    formData.append('name', name);
+    formData.append('name_kn', namekn);
+    formData.append('description', desc);
+    formData.append('price', parseFloat(price));
+    formData.append('unit', unit);
+    formData.append('in_stock', inStock);
+    if (imageFile) formData.append('image', imageFile);
+    const res = await fetch(`${API}/api/products/${id}`, {
+      method: 'PUT',
+      headers: { 'Authorization': `Bearer ${ownerToken}` },
+      body: formData
+    });
+    const data = await res.json();
+    if (data.success) {
+      closeEditModal();
+      loadProducts();
+      showAlert('alert-dash', `"${name}" updated!`, 'success');
+    } else { showAlert('alert-edit', data.error || 'Update failed.', 'error'); }
+  } catch (e) { showAlert('alert-edit', 'Failed to save.', 'error'); }
 }
 
 async function deleteProduct(id, name) {
@@ -613,12 +724,8 @@ async function deleteProduct(id, name) {
       headers: { 'Authorization': `Bearer ${ownerToken}` }
     });
     const data = await res.json();
-    if (data.success) {
-      loadProducts();
-      showAlert('alert-dash', `"${name}" deleted.`, 'success');
-    } else {
-      showAlert('alert-dash', data.error || 'Delete failed.', 'error');
-    }
+    if (data.success) { loadProducts(); showAlert('alert-dash', `"${name}" deleted.`, 'success'); }
+    else { showAlert('alert-dash', data.error || 'Delete failed.', 'error'); }
   } catch (e) { showAlert('alert-dash', 'Failed to delete.', 'error'); }
 }
 

@@ -13,7 +13,26 @@
   --bg:#fffdf8;--card:#ffffff;--blue:#2563eb;
 }
 *{box-sizing:border-box;margin:0;padding:0;}
-body{font-family:'Poppins',sans-serif;background:var(--bg);color:var(--text);max-width:480px;margin:0 auto;min-height:100vh;}
+body{font-family:'Poppins',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
+.page-wrap{max-width:520px;margin:0 auto;}
+@media(min-width:768px){
+  body{background:#ede8e0;}
+  .page-wrap{max-width:960px;}
+  .hero{padding:48px 32px;}
+  .hero h1{font-size:30px;}
+  .sec{padding:28px 32px;}
+  .products{grid-template-columns:repeat(4,1fr);gap:14px;}
+  .pcard{padding:16px 12px;}
+  .pname{font-size:13px;}
+  .pprice{font-size:18px;}
+  .modal{max-width:520px;border-radius:20px;}
+  .modal-overlay{align-items:center;}
+  nav{padding:14px 32px;}
+  nav .logo{font-size:20px;}
+  .lang-bar{padding:6px 32px;}
+  footer{padding:24px 32px;}
+}
+
 .kn{display:none;font-family:'Tiro Kannada',serif;}
 .en{display:inline;}
 body.kn-mode .en{display:none!important;}
@@ -126,15 +145,18 @@ body.logged-in footer{padding-bottom:70px;}
 
 <!-- ══ LANGUAGE BAR ══════════════════════════════════════════════════════════ -->
 <div class="lang-bar">
-  <div style="color:#fff;font-size:12px;">🐔 Naati Koli Farm</div>
-  <div style="display:flex;gap:6px;">
-    <button class="lang-btn active" onclick="setLang('en')">English</button>
-    <button class="lang-btn" onclick="setLang('kn')">ಕನ್ನಡ</button>
+  <div class="page-wrap" style="display:flex;justify-content:space-between;align-items:center;margin:0 auto;">
+    <div style="color:#fff;font-size:12px;">🐔 Naati Koli Farm</div>
+    <div style="display:flex;gap:6px;">
+      <button class="lang-btn active" onclick="setLang('en')">English</button>
+      <button class="lang-btn" onclick="setLang('kn')">&#3221;&#3240;&#3149;&#3240;&#3233;</button>
+    </div>
   </div>
 </div>
 
 <!-- ══ NAV ═══════════════════════════════════════════════════════════════════ -->
 <nav>
+  <div class="page-wrap" style="display:flex;justify-content:space-between;align-items:center;margin:0 auto;width:100%;">
   <div>
     <div class="logo">🐔 Naati <span>Koli</span></div>
     <div class="logo-sub">
@@ -150,8 +172,10 @@ body.logged-in footer{padding-bottom:70px;}
       🚪 Logout
     </button>
   </div>
+  </div>
 </nav>
 
+<div class="page-wrap" style="margin:0 auto;">
 <!-- ══ HOME PAGE ═════════════════════════════════════════════════════════════ -->
 <div id="page-home" class="page active">
   <div class="hero">
