@@ -149,7 +149,7 @@ body.logged-in footer{padding-bottom:70px;}
     <div style="color:#fff;font-size:12px;">🐔 Naati Koli Farm</div>
     <div style="display:flex;gap:6px;">
       <button class="lang-btn active" onclick="setLang('en')">English</button>
-      <button class="lang-btn" onclick="setLang('kn')">&#3221;&#3240;&#3149;&#3240;&#3233;</button>
+      <button class="lang-btn" onclick="setLang('kn')">ಕನ್ನಡ</button>
     </div>
   </div>
 </div>
@@ -477,7 +477,12 @@ function renderProducts() {
   grid.innerHTML = products.map(p => `
     <div class="pcard">
       ${p.in_stock ? '<span class="in-badge">✓ Stock</span>' : '<span class="out-badge">Out</span>'}
-      ${(p.name.toLowerCase().includes('egg') || p.name.toLowerCase().includes('egg') || p.name_kn && p.name_kn.includes('ಮೊಟ್ಟೆ')) ? '<img style="width:100%;height:110px;object-fit:cover;border-radius:10px;margin-bottom:8px;" src="https://abhishekms786.github.io/poultry-system/images/eggs.jpg" alt="Eggs" onerror="this.style.display=\'none\'">' : (p.name.toLowerCase().includes('live') || p.name.toLowerCase().includes('hen')) ? '<img style="width:100%;height:110px;object-fit:cover;border-radius:10px;margin-bottom:8px;" src="https://abhishekms786.github.io/poultry-system/images/chicken.jpg" alt="Chicken" onerror="this.style.display=\'none\'">' : '<div class="picon">' + p.icon + '</div>'}
+      ${p.has_image
+        ? `<img style="width:100%;height:110px;object-fit:cover;border-radius:10px;margin-bottom:8px;" src="${API}/api/products/${p.id}/image" alt="${p.name}" onerror="this.style.display='none'">`
+        : (p.name.toLowerCase().includes('egg') || (p.name_kn && p.name_kn.includes('ಮೊಟ್ಟೆ')))
+          ? '<img style="width:100%;height:110px;object-fit:cover;border-radius:10px;margin-bottom:8px;" src="https://abhishekms786.github.io/poultry-system/images/eggs.jpg" alt="Eggs" onerror="this.style.display=\'none\'">'
+          : '<div class="picon">' + p.icon + '</div>'
+      }
       <div class="pname">${p.name}${p.name_kn ? `<span class="kn" style="display:none;font-family:'Tiro Kannada',serif;">${p.name_kn}</span>` : ''}</div>
       <div class="pdesc">${p.description || ''}${p.description_kn ? `<span class="kn" style="display:none;font-family:'Tiro Kannada',serif;">${p.description_kn}</span>` : ''}</div>
       <div class="pprice">₹${p.price} <span class="punit">/${p.unit}</span></div>
