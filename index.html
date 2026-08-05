@@ -551,7 +551,7 @@ function renderProducts() {
   document.getElementById('products-list').innerHTML = products.map(p => `
     <div class="prod-card">
       ${p.has_image
-        ? `<img src="${API}/api/products/${p.id}/image" style="width:100%;height:160px;object-fit:cover;border-radius:10px;margin-bottom:10px;border:1px solid var(--border);" onerror="this.style.display='none'">`
+        ? `<img src="${API}/api/products/${p.id}/image" style="width:100%;height:160px;object-fit:contain;background:#fdf3e0;border-radius:10px;margin-bottom:10px;border:1px solid var(--border);" onerror="this.style.display='none'">`
         : `<div style="font-size:42px;text-align:center;margin-bottom:8px;padding:16px 0;">${p.icon || '\ud83c\udf57'}</div>`
       }
       <div class="prod-header">

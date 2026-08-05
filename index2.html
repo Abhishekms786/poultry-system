@@ -478,7 +478,7 @@ function renderProducts() {
     <div class="pcard">
       ${p.in_stock ? '<span class="in-badge">✓ Stock</span>' : '<span class="out-badge">Out</span>'}
       ${p.has_image
-        ? `<img style="width:100%;height:110px;object-fit:cover;border-radius:10px;margin-bottom:8px;" src="${API}/api/products/${p.id}/image" alt="${p.name}" onerror="this.style.display='none'">`
+        ? `<img style="width:100%;height:130px;object-fit:contain;background:#fdf3e0;border-radius:10px;margin-bottom:8px;" src="${API}/api/products/${p.id}/image" alt="${p.name}" onerror="this.style.display='none'">`
         : (p.name.toLowerCase().includes('egg') || (p.name_kn && p.name_kn.includes('ಮೊಟ್ಟೆ')))
           ? '<img style="width:100%;height:110px;object-fit:cover;border-radius:10px;margin-bottom:8px;" src="https://abhishekms786.github.io/poultry-system/images/eggs.jpg" alt="Eggs" onerror="this.style.display=\'none\'">'
           : '<div class="picon">' + p.icon + '</div>'
