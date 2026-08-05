@@ -247,7 +247,13 @@ input:checked+.sld:before{transform:translateX(22px);}
         <div class="fg"><label>Unit</label><select id="np-unit"><option>kg</option><option>egg</option><option>piece</option><option>litre</option></select></div>
       </div>
       <div class="fg"><label>Description</label><input type="text" id="np-desc" placeholder="Short description"></div>
-      <div class="fg"><label>Icon (emoji)</label><input type="text" id="np-icon" placeholder="🍗" value="🍗" maxlength="4"></div>
+      <div class="fg">
+        <label>Product Image</label>
+        <input type="file" id="np-image" accept="image/*" onchange="previewNewImage(this)" style="padding:6px;">
+        <div id="np-img-preview" style="margin-top:8px;display:none;">
+          <img id="np-img-thumb" style="width:100%;max-height:160px;object-fit:cover;border-radius:10px;border:1.5px solid var(--border);">
+        </div>
+      </div>
       <button class="btn-main" onclick="addProduct()">Add Product</button>
     </div>
 
@@ -494,9 +500,13 @@ async function loadProducts() {
 function renderProducts() {
   document.getElementById('products-list').innerHTML = products.map(p => `
     <div class="prod-card">
+      ${p.has_image
+        ? `<img src="${API}/api/products/${p.id}/image" style="width:100%;height:140px;object-fit:cover;border-radius:10px;margin-bottom:10px;border:1px solid var(--border);" onerror="this.style.display='none'">`
+        : `<div style="font-size:36px;text-align:center;margin-bottom:8px;">${p.icon || '\ud83c\udf57'}</div>`
+      }
       <div class="prod-header">
         <div>
-          <div class="prod-name">${p.icon} ${p.name}</div>
+          <div class="prod-name">${p.name}</div>
           <div style="font-size:11px;color:var(--muted);">${p.description || ''}</div>
         </div>
         <label class="toggle">
@@ -504,13 +514,14 @@ function renderProducts() {
           <span class="sld"></span>
         </label>
       </div>
-      <div style="font-size:12px;color:var(--muted);margin-bottom:6px;">${p.in_stock ? '✅ In Stock' : '❌ Out of Stock'}</div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:6px;">${p.in_stock ? '\u2705 In Stock' : '\u274c Out of Stock'}</div>
       <div class="price-edit-row">
-        <span style="font-size:15px;">₹</span>
+        <span style="font-size:15px;">\u20b9</span>
         <input class="price-input" type="number" id="price-${p.id}" value="${p.price}" min="1">
         <span style="font-size:13px;color:var(--muted);">/${p.unit}</span>
         <button class="save-btn" onclick="updatePrice(${p.id})">Save</button>
       </div>
+      <button onclick="deleteProduct(${p.id},'${p.name.replace(/'/g,'\\&apos;')}')" style="width:100%;margin-top:8px;padding:8px;background:#fde8e8;color:#a32d2d;border:1px solid #e24b4a;border-radius:8px;font-size:13px;cursor:pointer;font-family:'Poppins',sans-serif;">🗑️ Delete Product</button>
     </div>
   `).join('');
 }
@@ -549,24 +560,66 @@ async function addProduct() {
   const price = document.getElementById('np-price').value;
   const unit = document.getElementById('np-unit').value;
   const desc = document.getElementById('np-desc').value.trim();
-  const icon = document.getElementById('np-icon').value.trim() || '🍗';
   const namekn = document.getElementById('np-namekn').value.trim();
+  const imageFile = document.getElementById('np-image').files[0];
   if (!name || !price) { showAlert('alert-prod', 'Name and price required.', 'error'); return; }
   try {
+    const formData = new FormData();
+    formData.append('name', name);
+    formData.append('name_kn', namekn);
+    formData.append('description', desc);
+    formData.append('price', parseFloat(price));
+    formData.append('unit', unit);
+    formData.append('icon', '🍗');
+    if (imageFile) formData.append('image', imageFile);
     const res = await fetch(`${API}/api/products`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${ownerToken}` },
-      body: JSON.stringify({ name, name_kn: namekn, description: desc, price: parseFloat(price), unit, icon })
+      headers: { 'Authorization': `Bearer ${ownerToken}` }, // NO Content-Type — browser sets it for FormData
+      body: formData
     });
     const data = await res.json();
     if (data.success) {
       toggleAddForm();
+      document.getElementById('np-name').value = '';
+      document.getElementById('np-namekn').value = '';
+      document.getElementById('np-price').value = '';
+      document.getElementById('np-desc').value = '';
+      document.getElementById('np-image').value = '';
+      document.getElementById('np-img-preview').style.display = 'none';
       loadProducts();
       showAlert('alert-dash', `Product "${name}" added!`, 'success');
     } else {
       showAlert('alert-prod', data.error, 'error');
     }
   } catch (e) { showAlert('alert-prod', 'Failed to add.', 'error'); }
+}
+
+function previewNewImage(input) {
+  const file = input.files[0];
+  if (!file) { document.getElementById('np-img-preview').style.display = 'none'; return; }
+  const reader = new FileReader();
+  reader.onload = e => {
+    document.getElementById('np-img-thumb').src = e.target.result;
+    document.getElementById('np-img-preview').style.display = 'block';
+  };
+  reader.readAsDataURL(file);
+}
+
+async function deleteProduct(id, name) {
+  if (!confirm(`Delete "${name}"? This cannot be undone.`)) return;
+  try {
+    const res = await fetch(`${API}/api/products/${id}`, {
+      method: 'DELETE',
+      headers: { 'Authorization': `Bearer ${ownerToken}` }
+    });
+    const data = await res.json();
+    if (data.success) {
+      loadProducts();
+      showAlert('alert-dash', `"${name}" deleted.`, 'success');
+    } else {
+      showAlert('alert-dash', data.error || 'Delete failed.', 'error');
+    }
+  } catch (e) { showAlert('alert-dash', 'Failed to delete.', 'error'); }
 }
 
 // ── CUSTOMERS ─────────────────────────────────────────────────────────────────

@@ -4,10 +4,21 @@ const mysql = require('mysql2/promise');
 const cors = require('cors');
 const { v4: uuidv4 } = require('uuid');
 const https = require('https');
+const multer = require('multer');
 
 const app = express();
 app.use(express.json());
 app.use(cors({ origin: '*', methods: ['GET','POST','PUT','DELETE'], allowedHeaders: ['Content-Type','Authorization'] }));
+
+// Multer: store image in memory (we save binary to MySQL)
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB max
+  fileFilter: (req, file, cb) => {
+    if (file.mimetype.startsWith('image/')) cb(null, true);
+    else cb(new Error('Only image files allowed'));
+  }
+});
 
 console.log('DB_HOST:', process.env.DB_HOST);
 console.log('DB_PORT:', process.env.DB_PORT);
@@ -183,7 +194,8 @@ app.post('/api/owner/verify-otp', async (req, res) => {
 
 app.get('/api/products', async (req, res) => {
   try {
-    const [rows] = await pool.query('SELECT * FROM products ORDER BY id');
+    // Exclude binary image_data from list — served via /api/products/:id/image
+    const [rows] = await pool.query('SELECT id,name,name_kn,description,description_kn,price,unit,icon,in_stock,updated_at,(image_data IS NOT NULL) as has_image FROM products ORDER BY id');
     res.json(rows);
   } catch(err) { res.status(500).json({ error: err.message }); }
 });
@@ -197,13 +209,44 @@ app.put('/api/products/:id', ownerAuth, async (req, res) => {
   } catch(err) { res.status(500).json({ error: err.message }); }
 });
 
-app.post('/api/products', ownerAuth, async (req, res) => {
+app.post('/api/products', ownerAuth, upload.single('image'), async (req, res) => {
   try {
     const { name, name_kn, description, description_kn, price, unit, icon } = req.body;
     if (!name||!price) return res.status(400).json({ error: 'Name and price required.' });
-    const [result] = await pool.query('INSERT INTO products (name,name_kn,description,description_kn,price,unit,icon) VALUES (?,?,?,?,?,?,?)',[name,name_kn||'',description||'',description_kn||'',price,unit||'kg',icon||'']);
-    const [prod] = await pool.query('SELECT * FROM products WHERE id=?',[result.insertId]);
+    // Ensure image columns exist (safe migration)
+    try {
+      await pool.query('ALTER TABLE products ADD COLUMN image_data LONGBLOB');
+      await pool.query('ALTER TABLE products ADD COLUMN image_type VARCHAR(50)');
+    } catch(e) { /* columns already exist */ }
+    const imageData = req.file ? req.file.buffer : null;
+    const imageType = req.file ? req.file.mimetype : null;
+    const [result] = await pool.query(
+      'INSERT INTO products (name,name_kn,description,description_kn,price,unit,icon,image_data,image_type) VALUES (?,?,?,?,?,?,?,?,?)',
+      [name,name_kn||'',description||'',description_kn||'',price,unit||'kg',icon||'🍗',imageData,imageType]
+    );
+    const [prod] = await pool.query('SELECT id,name,name_kn,description,description_kn,price,unit,icon,in_stock,updated_at,(image_data IS NOT NULL) as has_image FROM products WHERE id=?',[result.insertId]);
     res.json({ success: true, product: prod[0] });
+  } catch(err) { res.status(500).json({ error: err.message }); }
+});
+
+// Serve product image
+app.get('/api/products/:id/image', async (req, res) => {
+  try {
+    const [rows] = await pool.query('SELECT image_data, image_type FROM products WHERE id=?',[req.params.id]);
+    if (!rows.length || !rows[0].image_data) return res.status(404).send('No image');
+    res.set('Content-Type', rows[0].image_type || 'image/jpeg');
+    res.set('Cache-Control', 'public, max-age=86400');
+    res.send(rows[0].image_data);
+  } catch(err) { res.status(500).json({ error: err.message }); }
+});
+
+// Delete product
+app.delete('/api/products/:id', ownerAuth, async (req, res) => {
+  try {
+    const [prod] = await pool.query('SELECT name FROM products WHERE id=?',[req.params.id]);
+    if (!prod.length) return res.status(404).json({ error: 'Product not found.' });
+    await pool.query('DELETE FROM products WHERE id=?',[req.params.id]);
+    res.json({ success: true, message: `Product "${prod[0].name}" deleted.` });
   } catch(err) { res.status(500).json({ error: err.message }); }
 });
 
